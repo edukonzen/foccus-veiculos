@@ -1,3 +1,5 @@
-export default function App() {
-    return <h1>App Page</h1>
+import { AuthForm } from "./_components/app-auth-page"
+
+export default function Auth() {
+    return <AuthForm />
 }
