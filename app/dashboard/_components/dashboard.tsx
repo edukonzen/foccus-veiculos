@@ -1,12 +1,28 @@
 'use client'
 
 import { useState } from 'react'
-import { DollarSign, Users, Settings, User, ChevronDown, LogOut, BookOpen } from 'lucide-react'
+import { DollarSign, Settings, User, ChevronDown, LogOut, BookOpen, Users, Plus, Search, Edit, Trash2, FileText } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { RegisteredCars } from './registered-cars'
 import { UserSettings } from './user-settings'
+import { Customers } from './customers'
 
-import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+interface Customer {
+  id: number
+  firstName: string
+  lastName: string
+  dateOfBirth: string
+  phone: string
+  email: string
+  address: string
+  cpf: string
+}
 
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState('catalog-cars')
@@ -14,8 +30,8 @@ export default function Dashboard() {
 
   const menuItems = [
     { id: 'catalog-cars', name: 'Catalog Cars', icon: BookOpen },
-    { id: 'financing-proposals', name: 'Financing Proposals', icon: DollarSign },
     { id: 'customers', name: 'Customers', icon: Users },
+    { id: 'financing-proposals', name: 'Financing Proposals', icon: DollarSign },
     { 
       id: 'settings', 
       name: 'Settings', 
@@ -26,14 +42,15 @@ export default function Dashboard() {
     },
   ]
 
+
   const renderContent = () => {
     switch (selectedItem) {
       case 'catalog-cars':
         return <RegisteredCars />
+      case 'customers':
+        return <Customers />
       case 'financing-proposals':
         return <h2 className="text-2xl font-bold">Financing Proposals</h2>
-      case 'customers':
-        return <h2 className="text-2xl font-bold">Customers</h2>
       case 'settings':
         return <h2 className="text-2xl font-bold">General Settings</h2>
       case 'settings-user':
@@ -58,7 +75,7 @@ export default function Dashboard() {
                   open={isSettingsOpen}
                   onOpenChange={setIsSettingsOpen}
                 >
-                  <CollapsibleTrigger className="flex items-center w-full px-4 py-2 text-left text-gray-600 hover:bg-gray-100">
+                <CollapsibleTrigger className="flex items-center w-full px-4 py-2 text-left text-gray-600 hover:bg-gray-100">
                     <item.icon className="w-5 h-5 mr-3" />
                     {item.name}
                     <ChevronDown className="w-4 h-4 ml-auto" />
