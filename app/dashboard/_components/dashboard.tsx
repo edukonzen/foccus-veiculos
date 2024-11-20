@@ -2,16 +2,17 @@
 
 import { useState } from 'react'
 import { DollarSign, Settings, User, ChevronDown, LogOut, BookOpen, Users, Plus, Search, Edit, Trash2, FileText } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Button } from "@/app/components/ui/button"
+import { Input } from "@/app/components/ui/input"
+import { Label } from "@/app/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/app/components/ui/dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/app/components/ui/collapsible"
 import { RegisteredCars } from './registered-cars'
 import { UserSettings } from './user-settings'
 import { Customers } from './customers'
+import { FinancingProposals } from './financing-proposals'
 
 interface Customer {
   id: number
@@ -50,7 +51,7 @@ export default function Dashboard() {
       case 'customers':
         return <Customers />
       case 'financing-proposals':
-        return <h2 className="text-2xl font-bold">Financing Proposals</h2>
+        return <FinancingProposals />
       case 'settings':
         return <h2 className="text-2xl font-bold">General Settings</h2>
       case 'settings-user':

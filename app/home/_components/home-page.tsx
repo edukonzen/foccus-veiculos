@@ -1,28 +1,28 @@
 'use client'
 
 import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Car, Facebook, Twitter, Instagram } from "lucide-react"
+import { Button } from "@/app/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/app/components/ui/card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/app/components/ui/select"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
-import Image from "next/image"
+} from "@/app/components/ui/carousel"
+import { Header } from "@/app/components/header"
+import { Footer } from "@/app/components/footer"
+import Image from 'next/image'
 
-export default function Component() {
-  const [selectedCategory, setSelectedCategory] = useState("")
+export default function HomePage() {
+  const [selectedCategory, setSelectedCategory] = useState("all")
 
   const allCars = [
     { title: "Luxury Sedan", description: "Elegant and comfortable, perfect for long drives.", category: "sedan" },
@@ -37,59 +37,48 @@ export default function Component() {
     { title: "Performance EV", description: "Electric power meets sports car performance.", category: "electric" },
   ]
 
-  const filteredCars = selectedCategory === 'allCars' || !selectedCategory
+  const filteredCars = selectedCategory === "all"
     ? allCars
     : allCars.filter(car => car.category === selectedCategory)
 
+  const categoryOptions = [
+    { value: "all", label: "Todas as Categorias" },
+    { value: "sedan", label: "Sedan" },
+    { value: "suv", label: "SUV" },
+    { value: "sports", label: "Carro Esportivo" },
+    { value: "electric", label: "Elétrico" },
+    { value: "hatchback", label: "Hatchback" },
+    { value: "minivan", label: "Minivan" },
+  ]
+
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="w-full max-w-7xl mx-auto px-4 lg:px-6 h-14 flex items-center justify-between">
-        <Link className="flex items-center justify-center" href="#">
-          <span className="sr-only">Foccus Veiculos</span>
-          <Car className="h-6 w-6" />
-          <span className="ml-2 text-lg font-semibold">Foccus Veiculos</span>
-        </Link>
-        <nav className="flex items-center gap-4 sm:gap-6">
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Home
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Inventory
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            About
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Contact
-          </Link>
-          <Button variant="outline">Login</Button>
-        </nav>
-      </header>
+      <Header />
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-black">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="flex flex-col items-center space-y-4">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
-                  Find Your Dream Car
+                  Encontre o Carro dos Seus Sonhos
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-300 md:text-xl">
-                  Explore our wide selection of premium vehicles and drive home your perfect match today.
+                  Explore nossa ampla seleção de veículos premium e leve para casa o seu carro perfeito hoje.
                 </p>
               </div>
               <div className="w-full max-w-sm space-y-2">
-                <Select onValueChange={setSelectedCategory}>
+                <Select onValueChange={setSelectedCategory} value={selectedCategory}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue>
+                      {categoryOptions.find(option => option.value === selectedCategory)?.label}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="allCars">All Categories</SelectItem>
-                    <SelectItem value="sedan">Sedan</SelectItem>
-                    <SelectItem value="suv">SUV</SelectItem>
-                    <SelectItem value="sports">Sports Car</SelectItem>
-                    <SelectItem value="electric">Electric</SelectItem>
-                    <SelectItem value="hatchback">Hatchback</SelectItem>
-                    <SelectItem value="minivan">Minivan</SelectItem>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -99,7 +88,7 @@ export default function Component() {
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
           <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
-              {selectedCategory ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Cars` : "All Categories"}
+              {selectedCategory === "all" ? "Todas as Categorias" : `Carros ${categoryOptions.find(option => option.value === selectedCategory)?.label}`}
             </h2>
             <Carousel
               opts={{
@@ -118,18 +107,18 @@ export default function Component() {
                       <CardContent>
                         <Image
                           alt={car.title}
-                          className="rounded-md"
+                          className="w-full h-48 object-cover rounded-md"
                           height={200}
                           src="/placeholder.svg"
                           style={{
-                            width: '100%',
+                            objectFit: "cover",
                           }}
                           width={300}
                         />
                         <p className="mt-2 text-sm text-gray-600">{car.description}</p>
                       </CardContent>
                       <CardFooter>
-                        <Button className="w-full">Learn More</Button>
+                        <Button className="w-full">Saiba Mais</Button>
                       </CardFooter>
                     </Card>
                   </CarouselItem>
@@ -141,28 +130,7 @@ export default function Component() {
           </div>
         </section>
       </main>
-      <footer className="w-full max-w-7xl mx-auto flex flex-col gap-2 sm:flex-row py-6 shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500">© 2024 Car Store. All rights reserved.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
-          </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
-          </Link>
-        </nav>
-        <div className="flex gap-4 sm:gap-6">
-          <Link href="#">
-            <Facebook className="h-4 w-4" />
-          </Link>
-          <Link href="#">
-            <Twitter className="h-4 w-4" />
-          </Link>
-          <Link href="#">
-            <Instagram className="h-4 w-4" />
-          </Link>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
