@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from "react"
-import { Button } from "@/app/components/ui/button"
-import { Input } from "@/app/components/ui/input"
-import { Checkbox } from "@/app/components/ui/checkbox"
-import { Slider } from "@/app/components/ui/slider"
-import { Card, CardContent, CardFooter } from "@/app/components/ui/card"
-import { Header } from "@/app/components/header"
-import { Footer } from "@/app/components/footer"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Slider } from "@/components/ui/slider"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 
 
 const carTypes = [

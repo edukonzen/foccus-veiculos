@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Edit, Trash2, Plus } from 'lucide-react'
-import { Button } from "@/app/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/app/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/app/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CarRegistrationForm } from './car-registration-form'
 import Image from 'next/image'
 

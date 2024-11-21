@@ -23,6 +23,9 @@ export function Footer() {
         <Link href="#">
           <Instagram className="h-4 w-4" />
         </Link>
+        <Link className="text-sm font-medium hover:underline underline-offset-4" href="dashboard">
+          Menu
+        </Link>
       </div>
     </footer>
   )

@@ -1,24 +1,24 @@
 'use client'
 
 import { useState } from "react"
-import { Button } from "@/app/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/app/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/app/components/ui/select"
+} from "@/components/ui/select"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/app/components/ui/carousel"
-import { Header } from "@/app/components/header"
-import { Footer } from "@/app/components/footer"
+} from "@/components/ui/carousel"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import Image from 'next/image'
 
 export default function HomePage() {
