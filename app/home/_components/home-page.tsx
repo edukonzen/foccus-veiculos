@@ -45,7 +45,7 @@ export default function HomePage() {
     { value: "all", label: "Todas as Categorias" },
     { value: "sedan", label: "Sedan" },
     { value: "suv", label: "SUV" },
-    { value: "sports", label: "Carro Esportivo" },
+    { value: "sports", label: "Esportivo" },
     { value: "electric", label: "Elétrico" },
     { value: "hatchback", label: "Hatchback" },
     { value: "minivan", label: "Minivan" },
@@ -68,8 +68,8 @@ export default function HomePage() {
               </div>
               <div className="w-full max-w-sm space-y-2">
                 <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue>
+                  <SelectTrigger className="w-full bg-white text-black">
+                    <SelectValue placeholder="Selecione uma categoria">
                       {categoryOptions.find(option => option.value === selectedCategory)?.label}
                     </SelectValue>
                   </SelectTrigger>
@@ -134,3 +134,4 @@ export default function HomePage() {
     </div>
   )
 }
+

@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Edit, Trash2, FileText } from 'lucide-react'
+//import { Plus, Search, Edit, Trash2, FileText } from 'lucide-react'
+import { Plus, Trash2, FileText } from 'lucide-react'
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -41,7 +43,7 @@ export function Customers() {
     cpf: ''
   })
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
+  //const [isEditing, setIsEditing] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('all')
   const [confirmationMessage, setConfirmationMessage] = useState('')
@@ -61,7 +63,6 @@ export function Customers() {
     if (editingCustomer) {
       setCustomers(customers.map(customer => customer.id === editingCustomer.id ? editingCustomer : customer))
       setEditingCustomer(null)
-      setIsEditing(false)
       setConfirmationMessage('Customer information updated successfully!')
     } else {
       const id = Math.max(...customers.map(c => c.id), 0) + 1
@@ -87,7 +88,6 @@ export function Customers() {
 
   const handleEdit = (customer: Customer) => {
     setEditingCustomer(customer)
-    setIsEditing(true)
     setIsModalOpen(true)
   }
 
@@ -114,7 +114,6 @@ export function Customers() {
           <DialogTrigger asChild>
             <Button onClick={() => {
               setEditingCustomer(null)
-              setIsEditing(false)
               setIsModalOpen(true)
             }}>
               <Plus className="w-4 h-4 mr-2" />
@@ -204,7 +203,6 @@ export function Customers() {
                 </Button>
                 <Button type="button" variant="outline" onClick={() => {
                   setEditingCustomer(null)
-                  setIsEditing(false)
                   setIsModalOpen(false)
                 }}>
                   Cancel
@@ -348,7 +346,6 @@ export function Customers() {
                           <Button type="submit">Save Changes</Button>
                           <Button type="button" variant="outline" onClick={() => {
                             setEditingCustomer(null)
-                            setIsEditing(false)
                             setIsModalOpen(false)
                           }}>
                             Cancel
