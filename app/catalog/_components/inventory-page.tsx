@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import Image from 'next/image';
 
 
 const carTypes = [
@@ -104,10 +105,12 @@ export default function InventoryPage() {
                 {filteredCars.map((car) => (
                   <Card key={car.id}>
                     <CardContent className="p-4">
-                      <img
+                      <Image
                         src={car.image}
                         alt={`${car.manufacturer} ${car.model}`}
                         className="w-full h-48 object-cover mb-4 rounded-md"
+                        width={500}
+                        height={300}
                       />
                       <h3 className="font-semibold text-lg mb-2">{car.manufacturer} {car.model}</h3>
                       <p className="text-sm text-gray-600 mb-1">Ano: {car.year}</p>
