@@ -23,7 +23,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/financiamento" className="text-sm text-gray-600 hover:text-primary transition-colors">
+                <Link href="/financing" className="text-sm text-gray-600 hover:text-primary transition-colors">
                   Opções de Financiamento
                 </Link>
               </li>
