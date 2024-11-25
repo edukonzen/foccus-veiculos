@@ -13,14 +13,15 @@ interface User {
   id: number
   name: string
   email: string
+  password?: string
   accessLevel: AccessLevel
 }
 
 export function UserSettings() {
   const [users, setUsers] = useState<User[]>([
-    { id: 1, name: 'John Doe', email: 'john@example.com', accessLevel: 'admin' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', accessLevel: 'user' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', accessLevel: 'readonly' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', password: 'password123', accessLevel: 'admin' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', password: 'password456', accessLevel: 'user' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', password: 'password789', accessLevel: 'readonly' },
   ])
 
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', accessLevel: 'user' as AccessLevel })
