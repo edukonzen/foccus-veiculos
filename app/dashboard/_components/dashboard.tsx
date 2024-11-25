@@ -18,16 +18,18 @@ import { FinancingProposals } from './financing-proposals'
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
-interface Customer {
-  id: number
-  firstName: string
-  lastName: string
-  dateOfBirth: string
-  phone: string
-  email: string
-  address: string
-  cpf: string
-}
+
+//interface Customer {
+//  id: number
+//  firstName: string
+//  lastName: string
+//  dateOfBirth: string
+//  phone: string
+//  email: string
+//  address: string
+//  cpf: string
+//}
+
 
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState('catalog-cars')

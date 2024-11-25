@@ -10,7 +10,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <Button variant="outline" className="w-full flex items-center justify-center">
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings href="/dashboard" className="mr-2 h-4 w-4" />
               Configurações
             </Button>
           </div>

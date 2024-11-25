@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { CalendarIcon, FileText, User, ImageIcon, Edit2, Plus } from 'lucide-react'
+import { CalendarIcon, FileText, ImageIcon, Edit2, Plus } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+//import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -76,7 +76,7 @@ export function FinancingProposals() {
     (filterStatus === 'all' || proposal.status === filterStatus)
   )
 
-  const handleProposalChange = (field: keyof FinancingProposal, value: any) => {
+  const handleProposalChange = (field: keyof FinancingProposal, value: string | number | boolean) => {
     if (editingProposal) {
       setEditingProposal({ ...editingProposal, [field]: value })
     }

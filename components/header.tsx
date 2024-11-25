@@ -26,7 +26,7 @@ export function Header() {
                   Catálogo
                 </Button>
               </Link>
-              <Link href="/financiamento" passHref>
+              <Link href="/financing" passHref>
                 <Button variant="ghost" className="text-sm font-medium">
                   Financiamento
                 </Button>
