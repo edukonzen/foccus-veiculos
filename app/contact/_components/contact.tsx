@@ -5,6 +5,15 @@ import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Phone, Mail, MapPin } from 'lucide-react'
 
+const storeInfo = {
+  address: "AV. SÃO BORJA, 232 RIO BRANCO - SÃO LEOPOLDO/RS",
+  number1: "(51) 98144-4422",
+  number2: "(51) 98186-0421",
+  email: "contato@carstore.com"
+};
+
+export const { address: storeAddress, number1: storeNumber1, number2: storeNumber2, email: storeEmail } = storeInfo;
+
 export default function ContatoPage() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -19,15 +28,15 @@ export default function ContatoPage() {
             <div className="space-y-4">
               <div className="flex items-center">
                 <Phone className="mr-2" />
-                <span>(11) 1234-5678</span>
+                <span>{storeNumber1} / {storeNumber2}</span>
               </div>
               <div className="flex items-center">
                 <Mail className="mr-2" />
-                <span>contato@carstore.com</span>
+                <span>{ storeEmail }</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="mr-2" />
-                <span>Av. dos Automóveis, 1000 - São Paulo, SP</span>
+                <span>{storeAddress}</span>
               </div>
             </div>
             <div className="mt-6 space-y-4">

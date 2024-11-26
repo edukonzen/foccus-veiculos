@@ -5,7 +5,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Car, Search, User, Menu } from 'lucide-react'
+import { Search, User, Menu } from 'lucide-react'
+import Image from 'next/image'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -51,8 +52,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link className="flex items-center justify-center" href="/">
-              <Car className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold text-primary">Foccus</span>
+              <Image src="/icons/foccus-veiculos-foto.png" alt="Logo" className="h-16 w-32" width={128} height={256} />
             </Link>
           </div>
           <div className="hidden md:block">

@@ -2,6 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Facebook, Twitter, Instagram, Youtube, Settings } from 'lucide-react'
+import { storeAddress, storeNumber1, storeNumber2 } from "@/app/contact/_components/contact";
+
 
 export function Footer() {
   return (
@@ -42,12 +44,10 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contato</h3>
             <address className="text-sm text-gray-600 not-italic">
-              <p>Rua dos Carros, 1234</p>
-              <p>Cidade dos Motores - UF</p>
-              <p>CEP: 12345-678</p>
+              <p>{storeAddress}</p>
               <p className="mt-2">
-                <a href="tel:+551199999999" className="hover:text-primary transition-colors">
-                  (11) 9999-9999
+                <a href={`tel:${storeNumber1},${storeNumber2}`} className="hover:text-primary transition-colors">
+                  {storeNumber1} / {storeNumber2}
                 </a>
               </p>
               <p>
