@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -10,26 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import Image from 'next/image'
+import { CustomCarousel } from "@/components/CustomCarousel"
 import Link from 'next/link'
-import Autoplay from "embla-carousel-autoplay"
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
-
-  const autoplayOptions = {
-    delay: 5000,
-    rootNode: (emblaRoot: HTMLElement) => emblaRoot.parentElement,
-  }
 
   const allCars = [
     { title: "Sedan de Luxo", description: "Elegante e confortável, perfeito para longas viagens.", category: "sedan" },
@@ -63,10 +49,22 @@ export default function HomePage() {
     { name: "Crédito Fácil", logo: "/placeholder.svg", description: "Aprovação rápida e taxas competitivas" },
     { name: "Leasing Premium", logo: "/placeholder.svg", description: "Opções de leasing para carros de luxo" },
     { name: "Financia Tudo", logo: "/placeholder.svg", description: "Soluções personalizadas de financiamento" },
-    { name: "Crédito Fácil", logo: "/placeholder.svg", description: "Aprovação rápida e taxas competitivas" },
-    { name: "Leasing Premium", logo: "/placeholder.svg", description: "Opções de leasing para carros de luxo" },
-    { name: "Financia Tudo", logo: "/placeholder.svg", description: "Soluções personalizadas de financiamento" },
   ]
+
+  const carCarouselItems = filteredCars.map(car => ({
+    title: car.title,
+    description: car.description,
+    imageSrc: "/placeholder.svg",
+    buttonText: "Saiba Mais"
+  }))
+
+  const partnerCarouselItems = financingPartners.map(partner => ({
+    title: partner.name,
+    description: partner.description,
+    imageSrc: partner.logo,
+    buttonText: "Ver Opções",
+    buttonVariant: "outline" as const
+  }))
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -100,107 +98,23 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
-          <div className="container mx-auto px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
-              {selectedCategory === "all" ? "Todas as Categorias" : `Carros ${categoryOptions.find(option => option.value === selectedCategory)?.label}`}
-            </h2>
-            <div className="relative px-4 sm:px-12">
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: true,
-                }}
-                plugins={[
-                  Autoplay(autoplayOptions),
-                ]}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2 md:-ml-4">
-                  {filteredCars.map((car, index) => (
-                    <CarouselItem key={index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                      <Card className="h-full flex flex-col">
-                        <CardHeader>
-                          <CardTitle className="line-clamp-1">{car.title}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1">
-                          <div className="aspect-[4/3] relative mb-4">
-                            <Image
-                              alt={car.title}
-                              className="rounded-md object-cover"
-                              src="/placeholder.svg"
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            />
-                          </div>
-                          <p className="text-sm text-gray-600 line-clamp-3">{car.description}</p>
-                        </CardContent>
-                        <CardFooter className="mt-auto">
-                          <Button className="w-full">Saiba Mais</Button>
-                        </CardFooter>
-                      </Card>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="hidden sm:block">
-                  <CarouselPrevious className="absolute -left-12 top-1/2" />
-                  <CarouselNext className="absolute -right-12 top-1/2" />
-                </div>
-              </Carousel>
-            </div>
-          </div>
-        </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
-          <div className="container mx-auto px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
-              Nossos Parceiros de Financiamento
-            </h2>
-            <div className="relative px-4 sm:px-12">
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: true,
-                }}
-                plugins={[
-                  Autoplay(autoplayOptions),
-                ]}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2 md:-ml-4">
-                  {financingPartners.map((partner, index) => (
-                    <CarouselItem key={index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{partner.name}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Image
-                            alt={partner.name}
-                            className="w-full h-24 object-contain rounded-md"
-                            height={96}
-                            src={partner.logo}
-                            style={{
-                              objectFit: "contain",
-                            }}
-                            width={200}
-                          />
-                          <p className="mt-2 text-sm text-gray-600">{partner.description}</p>
-                        </CardContent>
-                        <CardFooter>
-                          <Button variant="outline" className="w-full">Ver Opções</Button>
-                        </CardFooter>
-                      </Card>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="hidden sm:block">
-                  <CarouselPrevious className="absolute -left-12 top-1/2" />
-                  <CarouselNext className="absolute -right-12 top-1/2" />
-                </div>
-              </Carousel>
-            </div>
-          </div>
-        </section>
+
+        <CustomCarousel
+          items={carCarouselItems}
+          title={selectedCategory === "all" ? "Todas as Categorias" : `Carros ${categoryOptions.find(option => option.value === selectedCategory)?.label}`}
+          backgroundColor="bg-gray-100"
+        />
+
+        <CustomCarousel
+          items={partnerCarouselItems}
+          title="Nossos Parceiros de Financiamento"
+          imageAspectRatio="16/9"
+          imageHeight={96}
+          titleClamp={2}
+          descriptionClamp={2}
+          backgroundColor="bg-white"
+        />
+
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl mb-4">
