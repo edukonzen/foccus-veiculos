@@ -1,136 +1,217 @@
 'use client'
 
 import { useState } from "react"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import Image from 'next/image';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { CarDetailsModal } from "@/components/CarDetailsModal"
+import Image from 'next/image'
 
-
-const carTypes = [
-  { id: "sedan", label: "Sedan" },
-  { id: "suv", label: "SUV" },
-  { id: "sports", label: "Esportivo" },
-  { id: "electric", label: "Elétrico" },
-  { id: "hatchback", label: "Hatchback" },
-  { id: "minivan", label: "Minivan" },
+// Dados de exemplo para os carros
+const carros = [
+  { 
+    id: 1, 
+    nome: "Sedan Luxuoso", 
+    preco: 120000, 
+    categoria: "sedan", 
+    ano: 2022, 
+    modelo: "Sedan", 
+    fabricante: "FoccusCars",
+    cor: "Prata",
+    placa: "ABC1234",
+    portas: 4,
+    transmissao: "Automática",
+    imagens: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg"]
+  },
+  { 
+    id: 2, 
+    nome: "SUV Esportivo", 
+    preco: 150000, 
+    categoria: "suv", 
+    ano: 2023, 
+    modelo: "SUV", 
+    fabricante: "FoccusCars",
+    cor: "Preto",
+    placa: "DEF5678",
+    portas: 5,
+    transmissao: "Automática",
+    imagens: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg"]
+  },
+  { 
+    id: 3, 
+    nome: "Hatch Econômico", 
+    preco: 80000, 
+    categoria: "hatch", 
+    ano: 2021, 
+    modelo: "Hatch", 
+    fabricante: "FoccusCars",
+    cor: "Branco",
+    placa: "GHI9012",
+    portas: 5,
+    transmissao: "Manual",
+    imagens: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg"]
+  },
+  { 
+    id: 4, 
+    nome: "Picape Robusta", 
+    preco: 180000, 
+    categoria: "picape", 
+    ano: 2023, 
+    modelo: "Picape", 
+    fabricante: "FoccusCars",
+    cor: "Vermelho",
+    placa: "JKL3456",
+    portas: 4,
+    transmissao: "Automática",
+    imagens: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg"]
+  },
 ]
 
-const cars = [
-  { id: 1, model: "Civic", manufacturer: "Honda", year: 2022, price: 120000, color: "Prata", licensePlate: "ABC1234", doors: 4, transmission: "Automático", image: "/placeholder.svg", type: "sedan" },
-  { id: 2, model: "Corolla", manufacturer: "Toyota", year: 2023, price: 130000, color: "Branco", licensePlate: "DEF5678", doors: 4, transmission: "Automático", image: "/placeholder.svg", type: "sedan" },
-  { id: 3, model: "Golf", manufacturer: "Volkswagen", year: 2021, price: 110000, color: "Azul", licensePlate: "GHI9012", doors: 4, transmission: "Manual", image: "/placeholder.svg", type: "hatchback" },
-  { id: 4, model: "X5", manufacturer: "BMW", year: 2023, price: 350000, color: "Preto", licensePlate: "JKL3456", doors: 5, transmission: "Automático", image: "/placeholder.svg", type: "suv" },
-  { id: 5, model: "Model 3", manufacturer: "Tesla", year: 2022, price: 280000, color: "Vermelho", licensePlate: "MNO7890", doors: 4, transmission: "Automático", image: "/placeholder.svg", type: "electric" },
-  { id: 6, model: "911", manufacturer: "Porsche", year: 2023, price: 750000, color: "Amarelo", licensePlate: "PQR1234", doors: 2, transmission: "Automático", image: "/placeholder.svg", type: "sports" },
-  { id: 7, model: "Sienna", manufacturer: "Toyota", year: 2022, price: 200000, color: "Cinza", licensePlate: "STU5678", doors: 5, transmission: "Automático", image: "/placeholder.svg", type: "minivan" },
-  { id: 8, model: "Mustang", manufacturer: "Ford", year: 2021, price: 300000, color: "Vermelho", licensePlate: "VWX9012", doors: 2, transmission: "Manual", image: "/placeholder.svg", type: "sports" },
-]
+const modelos = ["Sedan", "SUV", "Hatch", "Picape"]
 
 export default function InventoryPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
-  const [yearRange, setYearRange] = useState([2021, 2023])
+  const [busca, setBusca] = useState("")
+  const [anoMin, setAnoMin] = useState("")
+  const [anoMax, setAnoMax] = useState("")
+  const [valorMin, setValorMin] = useState("")
+  const [valorMax, setValorMax] = useState("")
+  const [modelosSelecionados, setModelosSelecionados] = useState<string[]>([])
+  const [carroSelecionado, setCarroSelecionado] = useState<typeof carros[0] | null>(null)
 
-  const filteredCars = cars.filter(car => 
-    (searchTerm === "" || car.model.toLowerCase().includes(searchTerm.toLowerCase()) || car.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (selectedTypes.length === 0 || selectedTypes.includes(car.type)) &&
-    (car.year >= yearRange[0] && car.year <= yearRange[1])
+  const carrosFiltrados = carros.filter(carro => 
+    carro.nome.toLowerCase().includes(busca.toLowerCase()) &&
+    (anoMin === "" || carro.ano >= parseInt(anoMin)) &&
+    (anoMax === "" || carro.ano <= parseInt(anoMax)) &&
+    (valorMin === "" || carro.preco >= parseInt(valorMin)) &&
+    (valorMax === "" || carro.preco <= parseInt(valorMax)) &&
+    (modelosSelecionados.length === 0 || modelosSelecionados.includes(carro.modelo))
   )
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4 md:px-6">
-          <h1 className="text-3xl font-bold mb-8">Inventário de Carros</h1>
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/4">
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold mb-2">Buscar</h2>
-                  <Input
-                    type="text"
-                    placeholder="Buscar por modelo ou fabricante"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Catálogo de Veículos</h1>
+        
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="w-full md:w-1/4 space-y-6">
+            <div>
+              <label htmlFor="busca" className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+              <Input
+                id="busca"
+                placeholder="Buscar veículos..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Modelos</h2>
+              {modelos.map((modelo) => (
+                <div key={modelo} className="flex items-center space-x-2 mb-2">
+                  <Checkbox
+                    id={modelo}
+                    checked={modelosSelecionados.includes(modelo)}
+                    onCheckedChange={(checked) => {
+                      setModelosSelecionados(
+                        checked
+                          ? [...modelosSelecionados, modelo]
+                          : modelosSelecionados.filter((m) => m !== modelo)
+                      )
+                    }}
                   />
+                  <label
+                    htmlFor={modelo}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {modelo}
+                  </label>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold mb-2">Tipos de Carro</h2>
-                  {carTypes.map((type) => (
-                    <div key={type.id} className="flex items-center space-x-2 mb-2">
-                      <Checkbox
-                        id={type.id}
-                        checked={selectedTypes.includes(type.id)}
-                        onCheckedChange={(checked) => {
-                          setSelectedTypes(
-                            checked
-                              ? [...selectedTypes, type.id]
-                              : selectedTypes.filter((id) => id !== type.id)
-                          )
-                        }}
-                      />
-                      <label
-                        htmlFor={type.id}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {type.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold mb-2">Ano</h2>
-                  <Slider
-                    min={2021}
-                    max={2023}
-                    step={1}
-                    value={yearRange}
-                    onValueChange={setYearRange}
-                  />
-                  <div className="flex justify-between mt-2">
-                    <span>{yearRange[0]}</span>
-                    <span>{yearRange[1]}</span>
-                  </div>
-                </div>
+              ))}
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Ano</h2>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="De"
+                  value={anoMin}
+                  onChange={(e) => setAnoMin(e.target.value)}
+                  className="w-1/2"
+                />
+                <Input
+                  type="number"
+                  placeholder="Até"
+                  value={anoMax}
+                  onChange={(e) => setAnoMax(e.target.value)}
+                  className="w-1/2"
+                />
               </div>
             </div>
-            <div className="w-full md:w-3/4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredCars.map((car) => (
-                  <Card key={car.id}>
-                    <CardContent className="p-4">
-                      <Image
-                        src={car.image}
-                        alt={`${car.manufacturer} ${car.model}`}
-                        className="w-full h-48 object-cover mb-4 rounded-md"
-                        width={500}
-                        height={300}
-                      />
-                      <h3 className="font-semibold text-lg mb-2">{car.manufacturer} {car.model}</h3>
-                      <p className="text-sm text-gray-600 mb-1">Ano: {car.year}</p>
-                      <p className="text-sm text-gray-600 mb-1">Preço: R$ {car.price.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600 mb-1">Cor: {car.color}</p>
-                      <p className="text-sm text-gray-600 mb-1">Placa: {car.licensePlate}</p>
-                      <p className="text-sm text-gray-600 mb-1">Portas: {car.doors}</p>
-                      <p className="text-sm text-gray-600">Transmissão: {car.transmission}</p>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full">Ver Detalhes</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Valor</h2>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="De"
+                  value={valorMin}
+                  onChange={(e) => setValorMin(e.target.value)}
+                  className="w-1/2"
+                />
+                <Input
+                  type="number"
+                  placeholder="Até"
+                  value={valorMax}
+                  onChange={(e) => setValorMax(e.target.value)}
+                  className="w-1/2"
+                />
               </div>
+            </div>
+          </div>
+
+          <div className="w-full md:w-3/4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {carrosFiltrados.map(carro => (
+                <Card key={carro.id}>
+                  <CardHeader>
+                    <CardTitle>{carro.nome}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Image
+                      src={carro.imagens[0]}
+                      alt={carro.nome}
+                      width={300}
+                      height={200}
+                      className="w-full h-48 object-cover mb-4"
+                    />
+                    <p className="text-2xl font-bold">R$ {carro.preco.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500 capitalize">{carro.categoria}</p>
+                    <p className="text-sm text-gray-500">Ano: {carro.ano}</p>
+                    <p className="text-sm text-gray-500">Modelo: {carro.modelo}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full" onClick={() => setCarroSelecionado(carro)}>Ver Detalhes</Button>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
       </main>
       <Footer />
+      {carroSelecionado && (
+        <CarDetailsModal
+          isOpen={!!carroSelecionado}
+          onClose={() => setCarroSelecionado(null)}
+          car={carroSelecionado}
+        />
+      )}
     </div>
   )
 }
+
