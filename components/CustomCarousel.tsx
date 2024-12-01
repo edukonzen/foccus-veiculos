@@ -1,4 +1,3 @@
-import { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -10,6 +9,8 @@ import {
 } from "@/components/ui/carousel"
 import Image from 'next/image'
 import Autoplay from "embla-carousel-autoplay"
+import type { AutoplayOptionsType } from "embla-carousel-autoplay"
+//import type { Options as AutoplayOptions } from "embla-carousel-autoplay"
 
 interface CarouselItem {
   title: string
@@ -29,16 +30,16 @@ interface CustomCarouselProps {
   backgroundColor?: string
 }
 
-const autoplayOptions = {
-  delay: 6000,
-  rootNode: (emblaRoot: any) => emblaRoot.parentElement,
-}
+const autoplayOptions: AutoplayOptionsType = {
+  delay: 5000,
+  rootNode: (emblaRoot: HTMLElement) => emblaRoot.parentElement,
+};
 
 export function CustomCarousel({
   items,
   title,
   imageAspectRatio = "4/3",
-  imageHeight = 200,
+  //imageHeight = 200,
   titleClamp = 1,
   descriptionClamp = 3,
   backgroundColor = "bg-gray-100"
@@ -68,14 +69,17 @@ export function CustomCarousel({
                       <CardTitle className={`line-clamp-${titleClamp}`}>{item.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1">
-                      <div className={`aspect-[${imageAspectRatio}] relative mb-4`}>
-                        <Image
-                          alt={item.title}
-                          className="rounded-md object-cover"
-                          src={item.imageSrc}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
+                      <div className={`relative mb-4 w-full`} style={{ paddingTop: `${(parseInt(imageAspectRatio.split('/')[1]) / parseInt(imageAspectRatio.split('/')[0])) * 100}%` }}>
+                        <div className="absolute inset-0">
+                          <Image
+                            alt={item.title}
+                            className="rounded-md object-cover w-full h-full"
+                            src={item.imageSrc}
+                            width={300}
+                            height={200}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                        </div>
                       </div>
                       <p className={`text-sm text-gray-600 line-clamp-${descriptionClamp}`}>{item.description}</p>
                     </CardContent>
