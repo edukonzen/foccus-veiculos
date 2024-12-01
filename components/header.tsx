@@ -9,7 +9,7 @@ import { Search, User, Menu } from 'lucide-react'
 import Image from 'next/image'
 
 const NAV_ITEMS = [
-  { href: "/home", label: "Início" },
+  { href: "/", label: "Início" },
   { href: "/catalog", label: "Catálogo" },
   { href: "/financing", label: "Financiamento" },
   { href: "/about", label: "Sobre Nós" },

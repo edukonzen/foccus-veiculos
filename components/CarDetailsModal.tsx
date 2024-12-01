@@ -3,6 +3,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useEffect } from "react"
+import Autoplay from "embla-carousel-autoplay"
 
 interface CarDetailsModalProps {
   isOpen: boolean
@@ -24,6 +26,16 @@ interface CarDetailsModalProps {
 }
 
 export function CarDetailsModal({ isOpen, onClose, car }: CarDetailsModalProps) {
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const nextButton = document.querySelector('[data-carousel-next]') as HTMLButtonElement;
+      if (nextButton) {
+        nextButton.click();
+      }
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, []);
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] p-0 flex flex-col">
@@ -33,7 +45,9 @@ export function CarDetailsModal({ isOpen, onClose, car }: CarDetailsModalProps) 
               <DialogTitle className="text-2xl font-bold">{car.nome}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-6 py-4">
-              <Carousel className="w-full" opts={{ loop: true }}>
+              <Carousel className="w-full" opts={{ loop: true }} plugins={[
+                Autoplay({ delay: 6500 })
+              ]}>
                 <CarouselContent>
                   {car.imagens.map((imagem, index) => (
                     <CarouselItem key={index}>
