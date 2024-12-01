@@ -123,14 +123,16 @@ export function Header() {
               <SearchForm />
             </div>
             <div className="relative group rounded-md overflow-hidden">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                aria-label="Perfil do usuário" 
-                className="relative z-10 text-white transition-all duration-300"
-              >
-                <User className="h-5 w-5" />
-              </Button>
+              <Link href="/auth">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  aria-label="Perfil do usuário" 
+                  className="relative z-10 text-white transition-all duration-300"
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
               <div className="absolute inset-0 bg-white/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>

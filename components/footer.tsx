@@ -11,10 +11,12 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <Button variant="outline" className="w-full flex items-center justify-center">
-              <Settings href="/dashboard" className="mr-2 h-4 w-4" />
-              Configurações
-            </Button>
+            <Link href="/dashboard">
+              <Button variant="outline" className="w-full flex items-center justify-center">
+                <Settings href="/dashboard" className="mr-2 h-4 w-4" />
+               Configurações
+             </Button>
+            </Link>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4">Links Rápidos</h3>
