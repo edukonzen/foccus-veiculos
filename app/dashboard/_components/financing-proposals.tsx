@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { CalendarIcon, FileText, ImageIcon, Edit2, Plus } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-//import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -45,7 +44,7 @@ export function FinancingProposals() {
       isMarried: true,
       proposalDate: '2023-06-01',
       status: 'pending',
-      documents: ['ID.pdf', 'ProofOfIncome.pdf', 'AddressProof.pdf'],
+      documents: ['RG.pdf', 'ComprovanteRenda.pdf', 'ComprovanteEndereco.pdf'],
       address: 'Rua das Flores, 123, São Paulo - SP',
       proposalValue: 50000
     },
@@ -59,7 +58,7 @@ export function FinancingProposals() {
       isMarried: false,
       proposalDate: '2023-06-05',
       status: 'approved',
-      documents: ['ID.pdf', 'ProofOfIncome.pdf', 'AddressProof.pdf', 'VehicleInspection.pdf'],
+      documents: ['RG.pdf', 'ComprovanteRenda.pdf', 'ComprovanteEndereco.pdf', 'VistoriaVeiculo.pdf'],
       address: 'Avenida Paulista, 1000, São Paulo - SP',
       proposalValue: 75000
     }
@@ -113,29 +112,29 @@ export function FinancingProposals() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Financing Proposals</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Propostas de Financiamento</h2>
         <Button onClick={handleAddNewProposal}>
-          <Plus className="mr-2 h-4 w-4" /> Add Proposal
+          <Plus className="mr-2 h-4 w-4" /> Adicionar Proposta
         </Button>
       </div>
 
       <div className="flex space-x-2">
         <div className="flex-1">
           <Input
-            placeholder="Search by name or CPF..."
+            placeholder="Buscar por nome ou CPF..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
+            <SelectValue placeholder="Filtrar por status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="all">Todos os Status</SelectItem>
+            <SelectItem value="pending">Pendente</SelectItem>
+            <SelectItem value="approved">Aprovado</SelectItem>
+            <SelectItem value="rejected">Rejeitado</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -143,11 +142,11 @@ export function FinancingProposals() {
       <Table className="w-full rounded-lg overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead>Nome</TableHead>
             <TableHead>CPF</TableHead>
-            <TableHead>Proposal Date</TableHead>
+            <TableHead>Data da Proposta</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -169,7 +168,7 @@ export function FinancingProposals() {
                   proposal.status === 'rejected' ? 'bg-red-100 text-red-800' :
                   'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                  {proposal.status === 'approved' ? 'Aprovado' : proposal.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
                 </span>
               </TableCell>
               <TableCell className="px-4">
@@ -178,23 +177,23 @@ export function FinancingProposals() {
                     <DialogTrigger asChild>
                       <Button variant="outline" size="icon">
                         <FileText className="h-4 w-4" />
-                        <span className="sr-only">View Details</span>
+                        <span className="sr-only">Ver Detalhes</span>
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                       <DialogHeader>
-                        <DialogTitle>Proposal Details</DialogTitle>
+                        <DialogTitle>Detalhes da Proposta</DialogTitle>
                         <DialogDescription>
-                          Financing proposal for {proposal.customerName} {proposal.customerSurname}
+                          Proposta de financiamento para {proposal.customerName} {proposal.customerSurname}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-2 items-center gap-4">
-                          <Label>Full Name</Label>
+                          <Label>Nome Completo</Label>
                           <div>{proposal.customerName} {proposal.customerSurname}</div>
                         </div>
                         <div className="grid grid-cols-2 items-center gap-4">
-                          <Label>Date of Birth</Label>
+                          <Label>Data de Nascimento</Label>
                           <div className="flex items-center">
                             <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
                             {proposal.dateOfBirth}
@@ -209,26 +208,26 @@ export function FinancingProposals() {
                           <div>{proposal.rg}</div>
                         </div>
                         <div className="grid grid-cols-2 items-center gap-4">
-                          <Label>Marital Status</Label>
-                          <div>{proposal.isMarried ? 'Married' : 'Single'}</div>
+                          <Label>Estado Civil</Label>
+                          <div>{proposal.isMarried ? 'Casado(a)' : 'Solteiro(a)'}</div>
                         </div>
                         <div className="grid grid-cols-2 items-center gap-4">
-                          <Label>Proposal Date</Label>
+                          <Label>Data da Proposta</Label>
                           <div className="flex items-center">
                             <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
                             {proposal.proposalDate}
                           </div>
                         </div>
                         <div className="grid grid-cols-2 items-center gap-4">
-                          <Label>Address</Label>
+                          <Label>Endereço</Label>
                           <div>{proposal.address}</div>
                         </div>
                         <div className="grid grid-cols-2 items-center gap-4">
-                          <Label>Proposal Value</Label>
+                          <Label>Valor da Proposta</Label>
                           <div>{proposal.proposalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
                         </div>
                         <div className="grid grid-cols-1 items-center gap-4">
-                          <Label>Attached Documents</Label>
+                          <Label>Documentos Anexados</Label>
                           <ul className="list-disc list-inside">
                             {proposal.documents.map((doc, index) => (
                               <li key={index} className="flex items-center">
@@ -245,20 +244,20 @@ export function FinancingProposals() {
                     <DialogTrigger asChild>
                       <Button variant="outline" size="icon" onClick={() => setEditingProposal(proposal)}>
                         <Edit2 className="h-4 w-4" />
-                        <span className="sr-only">Edit Proposal</span>
+                        <span className="sr-only">Editar Proposta</span>
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[625px]">
                       <DialogHeader>
-                        <DialogTitle>Edit Proposal</DialogTitle>
+                        <DialogTitle>Editar Proposta</DialogTitle>
                         <DialogDescription>
-                          Update the proposal for {proposal.customerName} {proposal.customerSurname}
+                          Atualizar a proposta para {proposal.customerName} {proposal.customerSurname}
                         </DialogDescription>
                       </DialogHeader>
                       {editingProposal && (
                         <div className="grid gap-4 py-4">
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label htmlFor="customerName">First Name</Label>
+                            <Label htmlFor="customerName">Nome</Label>
                             <Input
                               id="customerName"
                               value={editingProposal.customerName}
@@ -266,7 +265,7 @@ export function FinancingProposals() {
                             />
                           </div>
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label htmlFor="customerSurname">Last Name</Label>
+                            <Label htmlFor="customerSurname">Sobrenome</Label>
                             <Input
                               id="customerSurname"
                               value={editingProposal.customerSurname}
@@ -274,7 +273,7 @@ export function FinancingProposals() {
                             />
                           </div>
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                            <Label htmlFor="dateOfBirth">Data de Nascimento</Label>
                             <Input
                               id="dateOfBirth"
                               type="date"
@@ -299,7 +298,7 @@ export function FinancingProposals() {
                             />
                           </div>
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label htmlFor="isMarried">Marital Status</Label>
+                            <Label htmlFor="isMarried">Estado Civil</Label>
                             <Checkbox
                               id="isMarried"
                               checked={editingProposal.isMarried}
@@ -307,7 +306,7 @@ export function FinancingProposals() {
                             />
                           </div>
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label htmlFor="proposalDate">Proposal Date</Label>
+                            <Label htmlFor="proposalDate">Data da Proposta</Label>
                             <Input
                               id="proposalDate"
                               type="date"
@@ -322,17 +321,17 @@ export function FinancingProposals() {
                               onValueChange={(value: 'pending' | 'approved' | 'rejected') => handleProposalChange('status', value)}
                             >
                               <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Select status" />
+                                <SelectValue placeholder="Selecione o status" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="approved">Approved</SelectItem>
-                                <SelectItem value="rejected">Rejected</SelectItem>
+                                <SelectItem value="pending">Pendente</SelectItem>
+                                <SelectItem value="approved">Aprovado</SelectItem>
+                                <SelectItem value="rejected">Rejeitado</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label htmlFor="address">Address</Label>
+                            <Label htmlFor="address">Endereço</Label>
                             <Input
                               id="address"
                               value={editingProposal.address}
@@ -340,7 +339,7 @@ export function FinancingProposals() {
                             />
                           </div>
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label htmlFor="proposalValue">Proposal Value</Label>
+                            <Label htmlFor="proposalValue">Valor da Proposta</Label>
                             <Input
                               id="proposalValue"
                               type="number"
@@ -348,7 +347,7 @@ export function FinancingProposals() {
                               onChange={(e) => handleProposalChange('proposalValue', parseFloat(e.target.value))}
                             />
                           </div>
-                          <Button onClick={handleSaveProposal}>Save Changes</Button>
+                          <Button onClick={handleSaveProposal}>Salvar Alterações</Button>
                         </div>
                       )}
                     </DialogContent>
@@ -362,3 +361,4 @@ export function FinancingProposals() {
     </div>
   )
 }
+

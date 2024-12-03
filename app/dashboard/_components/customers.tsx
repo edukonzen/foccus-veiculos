@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-//import { Plus, Search, Edit, Trash2, FileText } from 'lucide-react'
 import { Plus, Trash2, FileText } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogOverlay } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -24,14 +23,11 @@ interface Customer {
 
 export function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([
-    { id: 1, firstName: 'John', lastName: 'Doe', dateOfBirth: '1990-01-01', phone: '(11) 99999-9999', email: 'john@example.com', address: '123 Main St, City', cpf: '123.456.789-00' },
-    { id: 2, firstName: 'Jane', lastName: 'Smith', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'jane@example.com', address: '456 Elm St, Town', cpf: '987.654.321-00' },
-    { id: 3, firstName: 'Eduardo', lastName: 'Smith', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'jane@example.com', address: '456 Elm St, Town', cpf: '987.654.321-00' },
-    { id: 4, firstName: 'Edinal', lastName: 'Smith', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'jane@example.com', address: '456 Elm St, Town', cpf: '987.654.321-00' },
-    { id: 5, firstName: 'Elaine', lastName: 'Smith', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'jane@example.com', address: '456 Elm St, Town', cpf: '987.654.321-00' },
-    { id: 6, firstName: 'Fabiola', lastName: 'Smith', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'jane@example.com', address: '456 Elm St, Town', cpf: '987.654.321-00' },
-    { id: 7, firstName: 'José', lastName: 'Smith', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'jane@example.com', address: '456 Elm St, Town', cpf: '987.654.321-00' },
-
+    { id: 1, firstName: 'João', lastName: 'Silva', dateOfBirth: '1990-01-01', phone: '(11) 99999-9999', email: 'joao@exemplo.com', address: 'Rua Principal, 123, Cidade', cpf: '123.456.789-00' },
+    { id: 2, firstName: 'Maria', lastName: 'Santos', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'maria@exemplo.com', address: 'Avenida Central, 456, Cidade', cpf: '987.654.321-00' },
+    { id: 3, firstName: 'Eduardo', lastName: 'Oliveira', dateOfBirth: '1988-07-20', phone: '(11) 77777-7777', email: 'eduardo@exemplo.com', address: 'Rua das Flores, 789, Cidade', cpf: '456.789.123-00' },
+    { id: 4, firstName: 'Ana', lastName: 'Rodrigues', dateOfBirth: '1992-03-10', phone: '(11) 66666-6666', email: 'ana@exemplo.com', address: 'Avenida dos Pássaros, 321, Cidade', cpf: '789.123.456-00' },
+    { id: 5, firstName: 'Carlos', lastName: 'Ferreira', dateOfBirth: '1983-11-05', phone: '(11) 55555-5555', email: 'carlos@exemplo.com', address: 'Rua do Comércio, 654, Cidade', cpf: '321.654.987-00' },
   ])
   const [newCustomer, setNewCustomer] = useState<Omit<Customer, 'id'>>({
     firstName: '',
@@ -43,7 +39,6 @@ export function Customers() {
     cpf: ''
   })
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
-  //const [isEditing, setIsEditing] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('all')
   const [confirmationMessage, setConfirmationMessage] = useState('')
@@ -63,7 +58,7 @@ export function Customers() {
     if (editingCustomer) {
       setCustomers(customers.map(customer => customer.id === editingCustomer.id ? editingCustomer : customer))
       setEditingCustomer(null)
-      setConfirmationMessage('Customer information updated successfully!')
+      setConfirmationMessage('Informações do cliente atualizadas com sucesso!')
     } else {
       const id = Math.max(...customers.map(c => c.id), 0) + 1
       setCustomers([...customers, { id, ...newCustomer }])
@@ -76,10 +71,10 @@ export function Customers() {
         address: '',
         cpf: ''
       })
-      setConfirmationMessage('New customer added successfully!')
+      setConfirmationMessage('Novo cliente adicionado com sucesso!')
     }
     setIsModalOpen(false)
-    setTimeout(() => setConfirmationMessage(''), 3000) // Clear message after 3 seconds
+    setTimeout(() => setConfirmationMessage(''), 3000) // Limpa a mensagem após 3 segundos
   }
 
   const handleDelete = (id: number) => {
@@ -108,8 +103,8 @@ export function Customers() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Customers</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Clientes</h2>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => {
@@ -117,98 +112,114 @@ export function Customers() {
               setIsModalOpen(true)
             }}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Customer
+              Adicionar Cliente
             </Button>
           </DialogTrigger>
+          <DialogOverlay className="bg-black/30" />
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>{editingCustomer ? 'Edit Customer' : 'Add New Customer'}</DialogTitle>
+              <DialogTitle>{editingCustomer ? 'Editar Cliente' : 'Adicionar Novo Cliente'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="firstName">First Name</Label>
-                <Input 
-                  id="firstName" 
-                  name="firstName" 
-                  value={editingCustomer ? editingCustomer.firstName : newCustomer.firstName} 
-                  onChange={handleInputChange} 
-                  required 
+            <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="firstName" className="text-right">
+                  Nome
+                </Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  value={editingCustomer ? editingCustomer.firstName : newCustomer.firstName}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
                 />
               </div>
-              <div>
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input 
-                  id="lastName" 
-                  name="lastName" 
-                  value={editingCustomer ? editingCustomer.lastName : newCustomer.lastName} 
-                  onChange={handleInputChange} 
-                  required 
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="lastName" className="text-right">
+                  Sobrenome
+                </Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  value={editingCustomer ? editingCustomer.lastName : newCustomer.lastName}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
                 />
               </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  value={editingCustomer ? editingCustomer.email : newCustomer.email} 
-                  onChange={handleInputChange} 
-                  required 
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">
+                  E-mail
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={editingCustomer ? editingCustomer.email : newCustomer.email}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
                 />
               </div>
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input 
-                  id="phone" 
-                  name="phone" 
-                  value={editingCustomer ? editingCustomer.phone : newCustomer.phone} 
-                  onChange={handleInputChange} 
-                  required 
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">
+                  Telefone
+                </Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  value={editingCustomer ? editingCustomer.phone : newCustomer.phone}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
                 />
               </div>
-              <div>
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Input 
-                  id="dateOfBirth" 
-                  name="dateOfBirth" 
-                  type="date" 
-                  value={editingCustomer ? editingCustomer.dateOfBirth : newCustomer.dateOfBirth} 
-                  onChange={handleInputChange} 
-                  required 
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="dateOfBirth" className="text-right">
+                  Nascimento
+                </Label>
+                <Input
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  type="date"
+                  value={editingCustomer ? editingCustomer.dateOfBirth : newCustomer.dateOfBirth}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
                 />
               </div>
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Input 
-                  id="address" 
-                  name="address" 
-                  value={editingCustomer ? editingCustomer.address : newCustomer.address} 
-                  onChange={handleInputChange} 
-                  required 
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="address" className="text-right">
+                  Endereço
+                </Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={editingCustomer ? editingCustomer.address : newCustomer.address}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
                 />
               </div>
-              <div>
-                <Label htmlFor="cpf">CPF</Label>
-                <Input 
-                  id="cpf" 
-                  name="cpf" 
-                  value={editingCustomer ? editingCustomer.cpf : newCustomer.cpf} 
-                  onChange={handleInputChange} 
-                  required 
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="cpf" className="text-right">
+                  CPF
+                </Label>
+                <Input
+                  id="cpf"
+                  name="cpf"
+                  value={editingCustomer ? editingCustomer.cpf : newCustomer.cpf}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
                 />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button type="submit">
-                  {editingCustomer ? 'Save Changes' : 'Add Customer'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => {
-                  setEditingCustomer(null)
-                  setIsModalOpen(false)
-                }}>
-                  Cancel
-                </Button>
               </div>
             </form>
+            <DialogFooter>
+              <Button type="submit" onClick={handleSubmit}>
+                {editingCustomer ? 'Salvar Alterações' : 'Adicionar Cliente'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
@@ -220,7 +231,7 @@ export function Customers() {
       <div className="flex space-x-2 mb-4">
         <div className="flex-1">
           <Input
-            placeholder="Search customers..."
+            placeholder="Buscar clientes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full"
@@ -228,12 +239,12 @@ export function Customers() {
         </div>
         <Select value={filterBy} onValueChange={setFilterBy}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by" />
+            <SelectValue placeholder="Filtrar por" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="email">Email</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="name">Nome</SelectItem>
+            <SelectItem value="email">E-mail</SelectItem>
             <SelectItem value="cpf">CPF</SelectItem>
           </SelectContent>
         </Select>
@@ -241,10 +252,10 @@ export function Customers() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Nome</TableHead>
+            <TableHead>E-mail</TableHead>
+            <TableHead>Telefone</TableHead>
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -257,101 +268,115 @@ export function Customers() {
                 <div className="flex space-x-2">
                   <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" onClick={() => {
-                        handleEdit(customer)
-                        setIsModalOpen(true)
-                      }}>
-                        <FileText className="w-4 h-4" />
-                        <span className="sr-only">Edit Customer</span>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(customer)}>
+                        <FileText className="w-4 h-4 mr-2" />
+                        Editar
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                       <DialogHeader>
-                        <DialogTitle>Edit Customer</DialogTitle>
+                        <DialogTitle>Editar Cliente</DialogTitle>
                       </DialogHeader>
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                          <Label htmlFor="edit-firstName">First Name</Label>
-                          <Input 
-                            id="edit-firstName" 
-                            name="firstName" 
-                            value={editingCustomer?.firstName || ''} 
-                            onChange={handleInputChange} 
-                            required 
+                      <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="edit-firstName" className="text-right">
+                            Nome
+                          </Label>
+                          <Input
+                            id="edit-firstName"
+                            name="firstName"
+                            value={editingCustomer?.firstName || ''}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                            required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="edit-lastName">Last Name</Label>
-                          <Input 
-                            id="edit-lastName" 
-                            name="lastName" 
-                            value={editingCustomer?.lastName || ''} 
-                            onChange={handleInputChange} 
-                            required 
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="edit-lastName" className="text-right">
+                            Sobrenome
+                          </Label>
+                          <Input
+                            id="edit-lastName"
+                            name="lastName"
+                            value={editingCustomer?.lastName || ''}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                            required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="edit-email">Email</Label>
-                          <Input 
-                            id="edit-email" 
-                            name="email" 
-                            type="email" 
-                            value={editingCustomer?.email || ''} 
-                            onChange={handleInputChange} 
-                            required 
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="edit-email" className="text-right">
+                            E-mail
+                          </Label>
+                          <Input
+                            id="edit-email"
+                            name="email"
+                            type="email"
+                            value={editingCustomer?.email || ''}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                            required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="edit-phone">Phone</Label>
-                          <Input 
-                            id="edit-phone" 
-                            name="phone" 
-                            value={editingCustomer?.phone || ''} 
-                            onChange={handleInputChange} 
-                            required 
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="edit-phone" className="text-right">
+                            Telefone
+                          </Label>
+                          <Input
+                            id="edit-phone"
+                            name="phone"
+                            value={editingCustomer?.phone || ''}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                            required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="edit-dateOfBirth">Date of Birth</Label>
-                          <Input 
-                            id="edit-dateOfBirth" 
-                            name="dateOfBirth" 
-                            type="date" 
-                            value={editingCustomer?.dateOfBirth || ''} 
-                            onChange={handleInputChange} 
-                            required 
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="edit-dateOfBirth" className="text-right">
+                            Nascimento
+                          </Label>
+                          <Input
+                            id="edit-dateOfBirth"
+                            name="dateOfBirth"
+                            type="date"
+                            value={editingCustomer?.dateOfBirth || ''}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                            required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="edit-address">Address</Label>
-                          <Input 
-                            id="edit-address" 
-                            name="address" 
-                            value={editingCustomer?.address || ''} 
-                            onChange={handleInputChange} 
-                            required 
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="edit-address" className="text-right">
+                            Endereço
+                          </Label>
+                          <Input
+                            id="edit-address"
+                            name="address"
+                            value={editingCustomer?.address || ''}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                            required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="edit-cpf">CPF</Label>
-                          <Input 
-                            id="edit-cpf" 
-                            name="cpf" 
-                            value={editingCustomer?.cpf || ''} 
-                            onChange={handleInputChange} 
-                            required 
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="edit-cpf" className="text-right">
+                            CPF
+                          </Label>
+                          <Input
+                            id="edit-cpf"
+                            name="cpf"
+                            value={editingCustomer?.cpf || ''}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                            required
                           />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button type="submit">Save Changes</Button>
-                          <Button type="button" variant="outline" onClick={() => {
-                            setEditingCustomer(null)
-                            setIsModalOpen(false)
-                          }}>
-                            Cancel
-                          </Button>
                         </div>
                       </form>
+                      <DialogFooter>
+                        <Button type="submit" onClick={handleSubmit}>
+                          Salvar Alterações
+                        </Button>
+                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
                   <Button variant="destructive" size="sm" onClick={() => handleDelete(customer.id)}>
@@ -366,3 +391,4 @@ export function Customers() {
     </div>
   )
 }
+
