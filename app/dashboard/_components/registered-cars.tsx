@@ -7,11 +7,18 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CarRegistrationForm } from './car-registration-form'
 import Image from 'next/image'
-import type { Car as FormCar } from './car-registration-form'
 
-interface Car extends Omit<FormCar, 'image'> {
+interface Car {
   id: number
+  model: string
+  manufacturer: string
+  year: number
+  price: number
   image: string | null
+  color: string
+  licensePlate: string
+  doors: number
+  transmission: string
 }
 
 export function RegisteredCars() {
@@ -25,9 +32,17 @@ export function RegisteredCars() {
   }, [])
 
   const fetchCars = async () => {
-    const response = await fetch('/api/cars')
-    const data = await response.json()
-    setCars(data)
+    try {
+      const response = await fetch('/api/cars')
+      if (!response.ok) {
+        throw new Error('Failed to fetch cars')
+      }
+      const data = await response.json()
+      setCars(data)
+    } catch (error) {
+      console.error('Error fetching cars:', error)
+      setCars([])
+    }
   }
 
   const handleEdit = (car: Car) => {
@@ -37,8 +52,15 @@ export function RegisteredCars() {
   }
 
   const handleDelete = async (id: number) => {
-    await fetch(`/api/cars/${id}`, { method: 'DELETE' })
-    fetchCars()
+    try {
+      const response = await fetch(`/api/cars/${id}`, { method: 'DELETE' })
+      if (!response.ok) {
+        throw new Error('Failed to delete car')
+      }
+      fetchCars()
+    } catch (error) {
+      console.error('Error deleting car:', error)
+    }
   }
 
   const handleAddNewCar = () => {
@@ -48,16 +70,24 @@ export function RegisteredCars() {
   }
 
   const handleSubmit = async (formData: FormData) => {
-    const method = isAddingNewCar ? 'POST' : 'PUT'
-    const url = isAddingNewCar ? '/api/cars' : `/api/cars/${selectedCar?.id}`
+    try {
+      const method = isAddingNewCar ? 'POST' : 'PUT'
+      const url = isAddingNewCar ? '/api/cars' : `/api/cars/${selectedCar?.id}`
 
-    await fetch(url, {
-      method,
-      body: formData,
-    })
+      const response = await fetch(url, {
+        method,
+        body: formData,
+      })
 
-    setIsModalOpen(false)
-    fetchCars()
+      if (!response.ok) {
+        throw new Error('Failed to submit car data')
+      }
+
+      setIsModalOpen(false)
+      fetchCars()
+    } catch (error) {
+      console.error('Error submitting car data:', error)
+    }
   }
 
   return (
@@ -87,7 +117,7 @@ export function RegisteredCars() {
           <Card key={car.id} className="overflow-hidden">
             {car.image ? (
               <Image
-                src={typeof car.image === 'string' ? car.image : ''}
+                src={car.image}
                 alt={`${car.manufacturer} ${car.model}`}
                 width={300}
                 height={200}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Trash2, FileText } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,13 +21,7 @@ interface Customer {
 }
 
 export function Customers() {
-  const [customers, setCustomers] = useState<Customer[]>([
-    { id: 1, firstName: 'João', lastName: 'Silva', dateOfBirth: '1990-01-01', phone: '(11) 99999-9999', email: 'joao@exemplo.com', address: 'Rua Principal, 123, Cidade', cpf: '123.456.789-00' },
-    { id: 2, firstName: 'Maria', lastName: 'Santos', dateOfBirth: '1985-05-15', phone: '(11) 88888-8888', email: 'maria@exemplo.com', address: 'Avenida Central, 456, Cidade', cpf: '987.654.321-00' },
-    { id: 3, firstName: 'Eduardo', lastName: 'Oliveira', dateOfBirth: '1988-07-20', phone: '(11) 77777-7777', email: 'eduardo@exemplo.com', address: 'Rua das Flores, 789, Cidade', cpf: '456.789.123-00' },
-    { id: 4, firstName: 'Ana', lastName: 'Rodrigues', dateOfBirth: '1992-03-10', phone: '(11) 66666-6666', email: 'ana@exemplo.com', address: 'Avenida dos Pássaros, 321, Cidade', cpf: '789.123.456-00' },
-    { id: 5, firstName: 'Carlos', lastName: 'Ferreira', dateOfBirth: '1983-11-05', phone: '(11) 55555-5555', email: 'carlos@exemplo.com', address: 'Rua do Comércio, 654, Cidade', cpf: '321.654.987-00' },
-  ])
+  const [customers, setCustomers] = useState<Customer[]>([])
   const [newCustomer, setNewCustomer] = useState<Omit<Customer, 'id'>>({
     firstName: '',
     lastName: '',
@@ -43,6 +37,23 @@ export function Customers() {
   const [confirmationMessage, setConfirmationMessage] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  useEffect(() => {
+    fetchCustomers()
+  }, [])
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch('/api/customers')
+      if (!response.ok) {
+        throw new Error('Failed to fetch customers')
+      }
+      const data = await response.json()
+      setCustomers(data)
+    } catch (error) {
+      console.error('Error fetching customers:', error)
+    }
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (editingCustomer) {
@@ -52,32 +63,62 @@ export function Customers() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (editingCustomer) {
-      setCustomers(customers.map(customer => customer.id === editingCustomer.id ? editingCustomer : customer))
-      setEditingCustomer(null)
-      setConfirmationMessage('Informações do cliente atualizadas com sucesso!')
-    } else {
-      const id = Math.max(...customers.map(c => c.id), 0) + 1
-      setCustomers([...customers, { id, ...newCustomer }])
-      setNewCustomer({
-        firstName: '',
-        lastName: '',
-        dateOfBirth: '',
-        phone: '',
-        email: '',
-        address: '',
-        cpf: ''
-      })
-      setConfirmationMessage('Novo cliente adicionado com sucesso!')
+    try {
+      if (editingCustomer) {
+        const response = await fetch(`/api/customers/${editingCustomer.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingCustomer),
+        })
+        if (!response.ok) {
+          throw new Error('Failed to update customer')
+        }
+        setEditingCustomer(null)
+        setConfirmationMessage('Informações do cliente atualizadas com sucesso!')
+      } else {
+        const response = await fetch('/api/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newCustomer),
+        })
+        if (!response.ok) {
+          throw new Error('Failed to create customer')
+        }
+        setNewCustomer({
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+          phone: '',
+          email: '',
+          address: '',
+          cpf: ''
+        })
+        setConfirmationMessage('Novo cliente adicionado com sucesso!')
+      }
+      setIsModalOpen(false)
+      fetchCustomers()
+    } catch (error) {
+      console.error('Error submitting customer:', error)
+      setConfirmationMessage('Ocorreu um erro. Por favor, tente novamente.')
     }
-    setIsModalOpen(false)
     setTimeout(() => setConfirmationMessage(''), 3000)
   }
 
-  const handleDelete = (id: number) => {
-    setCustomers(customers.filter(customer => customer.id !== id))
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`/api/customers/${id}`, { method: 'DELETE' })
+      if (!response.ok) {
+        throw new Error('Failed to delete customer')
+      }
+      fetchCustomers()
+      setConfirmationMessage('Cliente excluído com sucesso!')
+    } catch (error) {
+      console.error('Error deleting customer:', error)
+      setConfirmationMessage('Ocorreu um erro ao excluir o cliente. Por favor, tente novamente.')
+    }
+    setTimeout(() => setConfirmationMessage(''), 3000)
   }
 
   const handleEdit = (customer: Customer) => {
@@ -95,7 +136,7 @@ export function Customers() {
     if (filterBy === 'all') return matchesSearch
     if (filterBy === 'name') return customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || customer.lastName.toLowerCase().includes(searchTerm.toLowerCase())
     if (filterBy === 'email') return customer.email.toLowerCase().includes(searchTerm.toLowerCase())
-    if (filterBy === 'cpf') return customer.cpf.includes(searchTerm)
+    if (filterBy === 'cpf') return customer.cpf.toLowerCase().includes(searchTerm)
 
     return matchesSearch
   })

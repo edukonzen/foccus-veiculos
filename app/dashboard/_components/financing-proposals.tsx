@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CalendarIcon, FileText, ImageIcon, Edit2, Plus } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,40 +33,28 @@ interface FinancingProposal {
 }
 
 export function FinancingProposals() {
-  const [proposals, setProposals] = useState<FinancingProposal[]>([
-    {
-      id: 1,
-      customerName: 'João',
-      customerSurname: 'Silva',
-      dateOfBirth: '1985-03-15',
-      cpf: '123.456.789-00',
-      rg: '12.345.678-9',
-      isMarried: true,
-      proposalDate: '2023-06-01',
-      status: 'pending',
-      documents: ['RG.pdf', 'ComprovanteRenda.pdf', 'ComprovanteEndereco.pdf'],
-      address: 'Rua das Flores, 123, São Paulo - SP',
-      proposalValue: 50000
-    },
-    {
-      id: 2,
-      customerName: 'Maria',
-      customerSurname: 'Santos',
-      dateOfBirth: '1990-07-22',
-      cpf: '987.654.321-00',
-      rg: '98.765.432-1',
-      isMarried: false,
-      proposalDate: '2023-06-05',
-      status: 'approved',
-      documents: ['RG.pdf', 'ComprovanteRenda.pdf', 'ComprovanteEndereco.pdf', 'VistoriaVeiculo.pdf'],
-      address: 'Avenida Paulista, 1000, São Paulo - SP',
-      proposalValue: 75000
-    }
-  ])
-
+  const [proposals, setProposals] = useState<FinancingProposal[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [editingProposal, setEditingProposal] = useState<FinancingProposal | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    fetchProposals()
+  }, [])
+
+  const fetchProposals = async () => {
+    try {
+      const response = await fetch('/api/financing-proposals')
+      if (!response.ok) {
+        throw new Error('Failed to fetch financing proposals')
+      }
+      const data = await response.json()
+      setProposals(data)
+    } catch (error) {
+      console.error('Error fetching financing proposals:', error)
+    }
+  }
 
   const filteredProposals = proposals.filter(proposal => 
     (proposal.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,14 +69,23 @@ export function FinancingProposals() {
     }
   }
 
-  const handleSaveProposal = () => {
+  const handleSaveProposal = async () => {
     if (editingProposal) {
-      if (editingProposal.id) {
-        setProposals(proposals.map(p => p.id === editingProposal.id ? editingProposal : p))
-      } else {
-        setProposals([...proposals, { ...editingProposal, id: proposals.length + 1 }])
+      try {
+        const response = await fetch(`/api/financing-proposals/${editingProposal.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingProposal),
+        })
+        if (!response.ok) {
+          throw new Error('Failed to update financing proposal')
+        }
+        fetchProposals()
+        setEditingProposal(null)
+        setIsModalOpen(false)
+      } catch (error) {
+        console.error('Error updating financing proposal:', error)
       }
-      setEditingProposal(null)
     }
   }
 
@@ -107,6 +104,27 @@ export function FinancingProposals() {
       address: '',
       proposalValue: 0
     })
+    setIsModalOpen(true)
+  }
+
+  const handleSubmitNewProposal = async () => {
+    if (editingProposal) {
+      try {
+        const response = await fetch('/api/financing-proposals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingProposal),
+        })
+        if (!response.ok) {
+          throw new Error('Failed to create financing proposal')
+        }
+        fetchProposals()
+        setEditingProposal(null)
+        setIsModalOpen(false)
+      } catch (error) {
+        console.error('Error creating financing proposal:', error)
+      }
+    }
   }
 
   return (
