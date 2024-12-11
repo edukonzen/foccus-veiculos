@@ -8,6 +8,7 @@ import { RegisteredCars } from './registered-cars'
 import { UserSettings } from './user-settings'
 import { Customers } from './customers'
 import { FinancingProposals } from './financing-proposals'
+import { FinancingSettings } from './financing-settings'
 
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -25,7 +26,8 @@ export default function Dashboard() {
       name: 'Configurações', 
       icon: Settings,
       subItems: [
-        { id: 'configuracoes-usuario', name: 'Usuário', icon: User }
+        { id: 'configuracoes-usuario', name: 'Usuário', icon: User },
+        { id: 'configuracoes-financiamento', name: 'Financiamento', icon: DollarSign }
       ]
     },
   ]
@@ -38,6 +40,8 @@ export default function Dashboard() {
         return <Customers />
       case 'propostas-financiamento':
         return <FinancingProposals />
+      case 'configuracoes-financiamento':
+        return <FinancingSettings />
       case 'configuracoes':
         return <h2 className="text-2xl font-bold">Configurações Gerais</h2>
       case 'configuracoes-usuario':

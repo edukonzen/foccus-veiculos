@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'
 export async function GET() {
   try {
     const users = await prisma.user.findMany({
-      select: { id: true, name: true, email: true, accessLevel: true },
+      select: { id: true, name: true, email: true, accessLevel: true, createdAt: true, updatedAt: true },
     })
     return NextResponse.json(users)
   } catch (error) {
@@ -17,11 +17,28 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { name, email, password, accessLevel } = await request.json()
+    
+    // Validar os dados recebidos
+    if (!name || !email || !password || !accessLevel) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Verificar se o e-mail já está em uso
+    const existingUser = await prisma.user.findUnique({ where: { email } })
+    if (existingUser) {
+      return NextResponse.json({ error: 'Email already in use' }, { status: 400 })
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, accessLevel },
+      data: { 
+        name, 
+        email, 
+        password: hashedPassword, 
+        accessLevel: accessLevel as 'ADMIN' | 'USER' | 'READONLY'
+      },
     })
-    const { password: _, ...userWithoutPassword } = user
+    const { password: _password, ...userWithoutPassword } = user
     return NextResponse.json(userWithoutPassword)
   } catch (error) {
     console.error('Error creating user:', error)

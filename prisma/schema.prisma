@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Car {
@@ -13,13 +13,21 @@ model Car {
   manufacturer String
   year         Int
   price        Float
-  image        String?
   color        String
   licensePlate String   @unique
   doors        Int
   transmission String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  photos       Photo[]
+  category     String
+}
+
+model Photo {
+  id     Int    @id @default(autoincrement())
+  url    String
+  carId  Int
+  car    Car    @relation(fields: [carId], references: [id])
 }
 
 model User {
@@ -27,9 +35,15 @@ model User {
   name         String
   email        String   @unique
   password     String
-  accessLevel  String
+  accessLevel  AccessLevel
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+enum AccessLevel {
+  ADMIN
+  USER
+  READONLY
 }
 
 model Customer {
@@ -62,3 +76,12 @@ model FinancingProposal {
   updatedAt      DateTime @updatedAt
 }
 
+model FinancingPartner {
+  id              String   @id @default(uuid())
+  name            String
+  logo            String
+  description     String
+  additionalInfo  String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

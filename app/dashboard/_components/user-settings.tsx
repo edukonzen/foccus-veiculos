@@ -9,22 +9,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-type AccessLevel = 'admin' | 'user' | 'readonly'
+type AccessLevel = 'ADMIN' | 'USER' | 'READONLY'
 
 interface User {
   id: number
   name: string
   email: string
   accessLevel: AccessLevel
+  createdAt: string
+  updatedAt: string
 }
 
 export function UserSettings() {
   const [users, setUsers] = useState<User[]>([])
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', accessLevel: 'user' as AccessLevel })
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', accessLevel: 'USER' as AccessLevel })
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [newPassword, setNewPassword] = useState('')
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchUsers()
@@ -40,7 +42,7 @@ export function UserSettings() {
       setUsers(data)
     } catch (error) {
       console.error('Error fetching users:', error)
-      setMessage({ type: 'error', text: 'Ocorreu um erro ao carregar os usuários. Por favor, tente novamente.' })
+      setError("Ocorreu um erro ao carregar os usuários. Por favor, tente novamente.")
     }
   }
 
@@ -63,6 +65,7 @@ export function UserSettings() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     try {
       if (editingUser) {
         const response = await fetch(`/api/users/${editingUser.id}`, {
@@ -71,9 +74,11 @@ export function UserSettings() {
           body: JSON.stringify({ ...editingUser, password: newPassword }),
         })
         if (!response.ok) {
-          throw new Error('Failed to update user')
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to update user')
         }
         setEditingUser(null)
+        alert("Usuário atualizado com sucesso!")
       } else {
         const response = await fetch('/api/users', {
           method: 'POST',
@@ -81,31 +86,34 @@ export function UserSettings() {
           body: JSON.stringify(newUser),
         })
         if (!response.ok) {
-          throw new Error('Failed to create user')
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to create user')
         }
-        setNewUser({ name: '', email: '', password: '', accessLevel: 'user' })
+        setNewUser({ name: '', email: '', password: '', accessLevel: 'USER' })
+        alert("Novo usuário criado com sucesso!")
       }
       setNewPassword('')
-      fetchUsers()
       setIsModalOpen(false)
-      setMessage({ type: 'success', text: editingUser ? 'Usuário atualizado com sucesso!' : 'Novo usuário criado com sucesso!' })
+      fetchUsers()
     } catch (error) {
       console.error('Error submitting user:', error)
-      setMessage({ type: 'error', text: 'Ocorreu um erro. Por favor, tente novamente.' })
+      setError(error instanceof Error ? error.message : "Ocorreu um erro. Por favor, tente novamente.")
     }
   }
 
   const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`/api/users/${id}`, { method: 'DELETE' })
-      if (!response.ok) {
-        throw new Error('Failed to delete user')
+    if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
+      try {
+        const response = await fetch(`/api/users/${id}`, { method: 'DELETE' })
+        if (!response.ok) {
+          throw new Error('Failed to delete user')
+        }
+        fetchUsers()
+        alert("Usuário excluído com sucesso!")
+      } catch (error) {
+        console.error('Error deleting user:', error)
+        setError("Ocorreu um erro ao excluir o usuário. Por favor, tente novamente.")
       }
-      fetchUsers()
-      setMessage({ type: 'success', text: 'Usuário excluído com sucesso!' })
-    } catch (error) {
-      console.error('Error deleting user:', error)
-      setMessage({ type: 'error', text: 'Ocorreu um erro. Por favor, tente novamente.' })
     }
   }
 
@@ -117,13 +125,7 @@ export function UserSettings() {
 
   return (
     <div>
-      {message && (
-        <div className={`p-4 mb-4 text-sm rounded-lg ${
-          message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`} role="alert">
-          {message.text}
-        </div>
-      )}
+      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Configurações de Usuário</h2>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -185,9 +187,9 @@ export function UserSettings() {
                     <SelectValue placeholder="Selecione o nível de acesso" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="user">Usuário Regular</SelectItem>
-                    <SelectItem value="readonly">Somente Leitura</SelectItem>
+                    <SelectItem value="ADMIN">Administrador</SelectItem>
+                    <SelectItem value="USER">Usuário Regular</SelectItem>
+                    <SelectItem value="READONLY">Somente Leitura</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -205,6 +207,8 @@ export function UserSettings() {
             <TableHead>Nome</TableHead>
             <TableHead>E-mail</TableHead>
             <TableHead>Nível de Acesso</TableHead>
+            <TableHead>Data de Criação</TableHead>
+            <TableHead>Última Atualização</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -213,7 +217,9 @@ export function UserSettings() {
             <TableRow key={user.id}>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell className="capitalize">{user.accessLevel}</TableCell>
+              <TableCell className="capitalize">{user.accessLevel.toLowerCase()}</TableCell>
+              <TableCell>{new Date(user.createdAt).toLocaleString()}</TableCell>
+              <TableCell>{new Date(user.updatedAt).toLocaleString()}</TableCell>
               <TableCell>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>

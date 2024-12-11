@@ -74,7 +74,7 @@ export function CustomCarousel({
                           <Image
                             alt={item.title}
                             className="rounded-md object-cover w-full h-full"
-                            src={item.imageSrc}
+                            src={typeof item.imageSrc === 'string' ? item.imageSrc : ''}
                             width={300}
                             height={200}
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

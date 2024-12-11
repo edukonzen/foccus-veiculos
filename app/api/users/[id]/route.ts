@@ -7,7 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const id = parseInt(params.id)
     const user = await prisma.user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, accessLevel: true },
+      select: { id: true, name: true, email: true, accessLevel: true, createdAt: true, updatedAt: true },
     })
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -23,11 +23,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const id = parseInt(params.id)
     const { name, email, password, accessLevel } = await request.json()
-    let data: any = { name, email, accessLevel }
-    if (password) {
-      data.password = await bcrypt.hash(password, 10)
+    
+    // Validar os dados recebidos
+    if (!name || !email || !accessLevel) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
-    const user = await prisma.user.update({ where: { id }, data })
+
+    const updateData: any = { name, email, accessLevel }
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10)
+    }
+    const user = await prisma.user.update({ 
+      where: { id }, 
+      data: {
+        ...updateData,
+        accessLevel: accessLevel as 'ADMIN' | 'USER' | 'READONLY'
+      }
+    })
     const { password: _, ...userWithoutPassword } = user
     return NextResponse.json(userWithoutPassword)
   } catch (error) {

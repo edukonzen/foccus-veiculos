@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -12,49 +12,96 @@ import {
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { CustomCarousel } from "@/components/CustomCarousel"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Link from 'next/link'
+
+interface Car {
+  id: number
+  model: string
+  manufacturer: string
+  year: number
+  price: number
+  color: string
+  licensePlate: string
+  doors: number
+  transmission: string
+  category: string
+  photos: { url: string }[]
+}
+
+interface FinancingPartner {
+  id: string
+  name: string
+  description: string
+  additionalInfo: string
+  logo: string
+}
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [cars, setCars] = useState<Car[]>([])
+  const [financingPartners, setFinancingPartners] = useState<FinancingPartner[]>([])
+  const [selectedPartner, setSelectedPartner] = useState<FinancingPartner | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const allCars = [
-    { title: "Sedan de Luxo", description: "Elegante e confortável, perfeito para longas viagens.", category: "sedan" },
-    { title: "Carro Esportivo", description: "Veículo de alto desempenho para os amantes de adrenalina.", category: "sports" },
-    { title: "SUV Elétrico", description: "Ecológico e espaçoso para aventuras em família.", category: "suv" },
-    { title: "Hatchback Compacto", description: "Eficiente e fácil de manobrar no trânsito da cidade.", category: "hatchback" },
-    { title: "4x4 Off-road", description: "Robusto e capaz para todas as suas aventuras.", category: "suv" },
-    { title: "Minivan Familiar", description: "Espaçoso e versátil para famílias em crescimento.", category: "minivan" },
-    { title: "Sedan Executivo", description: "Luxo refinado para negócios e prazer.", category: "sedan" },
-    { title: "Compacto Elétrico", description: "Carro ecológico para commuters urbanos.", category: "electric" },
-    { title: "SUV de Luxo", description: "Conforto premium com capacidades off-road.", category: "suv" },
-    { title: "EV de Performance", description: "Potência elétrica encontra desempenho de carro esportivo.", category: "electric" },
-  ]
+  useEffect(() => {
+    fetchCars()
+    fetchFinancingPartners()
+  }, [])
+
+  const fetchCars = async () => {
+    try {
+      const response = await fetch('/api/cars')
+      if (!response.ok) {
+        throw new Error('Failed to fetch cars')
+      }
+      const data = await response.json()
+      setCars(data)
+    } catch (error) {
+      console.error('Error fetching cars:', error)
+    }
+  }
+
+  const fetchFinancingPartners = async () => {
+    try {
+      const response = await fetch('/api/financing-partners')
+      if (!response.ok) {
+        throw new Error('Failed to fetch financing partners')
+      }
+      const data = await response.json()
+      setFinancingPartners(data)
+    } catch (error) {
+      console.error('Error fetching financing partners:', error)
+    }
+  }
 
   const filteredCars = selectedCategory === "all"
-    ? allCars
-    : allCars.filter(car => car.category === selectedCategory)
+    ? cars
+    : cars.filter(car => car.category.toLowerCase() === selectedCategory.toLowerCase())
 
   const categoryOptions = [
     { value: "all", label: "Todas as Categorias" },
+    { value: "hatch", label: "Hatch" },
     { value: "sedan", label: "Sedan" },
     { value: "suv", label: "SUV" },
-    { value: "sports", label: "Esportivo" },
-    { value: "electric", label: "Elétrico" },
-    { value: "hatchback", label: "Hatchback" },
+    { value: "picape", label: "Picape" },
     { value: "minivan", label: "Minivan" },
-  ]
-
-  const financingPartners = [
-    { name: "Banco Auto", logo: "/placeholder.svg", description: "Financiamento flexível para todos os modelos" },
-    { name: "Crédito Fácil", logo: "/placeholder.svg", description: "Aprovação rápida e taxas competitivas" },
-    { name: "Leasing Premium", logo: "/placeholder.svg", description: "Opções de leasing para carros de luxo" },
-    { name: "Financia Tudo", logo: "/placeholder.svg", description: "Soluções personalizadas de financiamento" },
+    { value: "conversivel", label: "Conversível" },
+    { value: "coupe", label: "Cupê" },
+    { value: "esportivo", label: "Esportivo" },
+    { value: "wagon", label: "Wagon (Perua)" },
+    { value: "utilitario", label: "Utilitário" },
+    { value: "offroad", label: "Off-Road" },
+    { value: "eletrico", label: "Elétrico" },
+    { value: "hibrido", label: "Híbrido" },
+    { value: "compacto", label: "Compacto" },
+    { value: "luxo", label: "Luxo" },
   ]
 
   const carCarouselItems = filteredCars.map(car => ({
-    title: car.title,
-    description: car.description,
-    imageSrc: "/placeholder.svg",
+    title: `${car.manufacturer} ${car.model}`,
+    description: `${car.year} - ${car.transmission} - ${car.doors} portas`,
+    imageSrc: car.photos[0]?.url || "/placeholder.svg",
     buttonText: "Saiba Mais"
   }))
 
@@ -63,7 +110,11 @@ export default function HomePage() {
     description: partner.description,
     imageSrc: partner.logo,
     buttonText: "Ver Opções",
-    buttonVariant: "outline" as const
+    buttonVariant: "outline" as const,
+    onClick: () => {
+      setSelectedPartner(partner)
+      setIsModalOpen(true)
+    }
   }))
 
   return (
@@ -100,6 +151,7 @@ export default function HomePage() {
         </section>
 
         <CustomCarousel
+          key={selectedCategory}
           items={carCarouselItems}
           title={selectedCategory === "all" ? "Todas as Categorias" : `Carros ${categoryOptions.find(option => option.value === selectedCategory)?.label}`}
           backgroundColor="bg-gray-100"
@@ -125,16 +177,27 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/catalog">Ver Catálogo Completo</Link>
+                <Link href="/catalogo">Ver Catálogo Completo</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/contact">Fale com um Consultor</Link>
+                <Link href="/contato">Fale com um Consultor</Link>
               </Button>
             </div>
           </div>
         </section>
       </main>
       <Footer />
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedPartner?.name}</DialogTitle>
+            <DialogDescription>
+              {selectedPartner?.additionalInfo}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
