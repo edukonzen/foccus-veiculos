@@ -7,7 +7,15 @@ const uploadDir = path.join(process.cwd(), 'public', 'uploads')
 
 export async function GET() {
   try {
-    const financingPartners = await prisma.financingPartner.findMany()
+    const financingPartners = await prisma.financingPartner.findMany({
+      select: {
+        id: true,
+        name: true,
+        logo: true,
+        description: true,
+        additionalInfo: true,
+      }
+    })
     return NextResponse.json(financingPartners)
   } catch (error) {
     console.error('Error fetching financing partners:', error)

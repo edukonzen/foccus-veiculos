@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Edit, Trash2, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -53,6 +53,8 @@ export function RegisteredCars() {
     category: '',
     photos: []
   })
+  const [sortBy, setSortBy] = useState<'manufacturer' | 'year' | 'category'>('manufacturer')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
     fetchCars()
@@ -72,6 +74,22 @@ export function RegisteredCars() {
       setCars([])
     }
   }
+
+  const sortedCars = useMemo(() => {
+    return [...cars].sort((a, b) => {
+      if (sortBy === 'manufacturer') {
+        return sortOrder === 'asc'
+          ? a.manufacturer.localeCompare(b.manufacturer)
+          : b.manufacturer.localeCompare(a.manufacturer)
+      } else if (sortBy === 'year') {
+        return sortOrder === 'asc' ? a.year - b.year : b.year - a.year
+      } else {
+        return sortOrder === 'asc'
+          ? a.category.localeCompare(b.category)
+          : b.category.localeCompare(a.category)
+      }
+    })
+  }, [cars, sortBy, sortOrder])
 
   const handleEdit = (car: Car) => {
     setSelectedCar(car)
@@ -301,8 +319,29 @@ export function RegisteredCars() {
           </DialogContent>
         </Dialog>
       </div>
+      <div className="flex justify-end space-x-2 mb-4">
+        <Select value={sortBy} onValueChange={(value: 'manufacturer' | 'year' | 'category') => setSortBy(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Ordenar por" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="manufacturer">Fabricante</SelectItem>
+            <SelectItem value="year">Ano</SelectItem>
+            <SelectItem value="category">Categoria</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Ordem" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Crescente</SelectItem>
+            <SelectItem value="desc">Decrescente</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cars.map(car => (
+        {sortedCars.map(car => (
           <Card key={car.id} className="overflow-hidden">
             {car.photos.length > 0 ? (
               <Image

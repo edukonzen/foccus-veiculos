@@ -12,7 +12,6 @@ import {
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { CustomCarousel } from "@/components/CustomCarousel"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Link from 'next/link'
 
 interface Car {
@@ -33,47 +32,34 @@ interface FinancingPartner {
   id: string
   name: string
   description: string
-  additionalInfo: string
   logo: string
 }
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [cars, setCars] = useState<Car[]>([])
-  const [financingPartners, setFinancingPartners] = useState<FinancingPartner[]>([])
-  const [selectedPartner, setSelectedPartner] = useState<FinancingPartner | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchCars()
-    fetchFinancingPartners()
+    const fetchCars = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('/api/cars');
+        if (!response.ok) throw new Error('Failed to fetch cars');
+        const data = await response.json();
+        setCars(data);
+      } catch (err) {
+        console.error("Error fetching cars:", err);
+        setError("Failed to load cars. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCars();
   }, [])
-
-  const fetchCars = async () => {
-    try {
-      const response = await fetch('/api/cars')
-      if (!response.ok) {
-        throw new Error('Failed to fetch cars')
-      }
-      const data = await response.json()
-      setCars(data)
-    } catch (error) {
-      console.error('Error fetching cars:', error)
-    }
-  }
-
-  const fetchFinancingPartners = async () => {
-    try {
-      const response = await fetch('/api/financing-partners')
-      if (!response.ok) {
-        throw new Error('Failed to fetch financing partners')
-      }
-      const data = await response.json()
-      setFinancingPartners(data)
-    } catch (error) {
-      console.error('Error fetching financing partners:', error)
-    }
-  }
 
   const filteredCars = selectedCategory === "all"
     ? cars
@@ -105,17 +91,48 @@ export default function HomePage() {
     buttonText: "Saiba Mais"
   }))
 
-  const partnerCarouselItems = financingPartners.map(partner => ({
+  const mockedFinancingPartners: FinancingPartner[] = [
+    {
+      id: "1",
+      name: "Banco Auto",
+      description: "Financiamento flexível para todos os modelos",
+      logo: "/placeholder.svg"
+    },
+    {
+      id: "2",
+      name: "Crédito Fácil",
+      description: "Aprovação rápida e taxas competitivas",
+      logo: "/placeholder.svg"
+    },
+    {
+      id: "3",
+      name: "Leasing Premium",
+      description: "Opções de leasing para carros de luxo",
+      logo: "/placeholder.svg"
+    },
+    {
+      id: "4",
+      name: "Financia Tudo",
+      description: "Soluções personalizadas de financiamento",
+      logo: "/placeholder.svg"
+    }
+  ]
+
+  const partnerCarouselItems = mockedFinancingPartners.map(partner => ({
     title: partner.name,
     description: partner.description,
     imageSrc: partner.logo,
     buttonText: "Ver Opções",
-    buttonVariant: "outline" as const,
-    onClick: () => {
-      setSelectedPartner(partner)
-      setIsModalOpen(true)
-    }
+    buttonVariant: "outline" as const
   }))
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Carregando...</div>
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -187,17 +204,6 @@ export default function HomePage() {
         </section>
       </main>
       <Footer />
-
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedPartner?.name}</DialogTitle>
-            <DialogDescription>
-              {selectedPartner?.additionalInfo}
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
