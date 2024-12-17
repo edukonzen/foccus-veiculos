@@ -1,43 +1,53 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { toast } from "sonner"
 
 export default function AuthPage() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsLoading(true)
 
     const formData = new FormData(event.currentTarget)
-    const isLogin = formData.get('action') === 'login'
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register'
+    const isLoginForm = formData.get('action') === 'login'
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        body: JSON.stringify(Object.fromEntries(formData)),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (response.ok) {
-        router.push('/dashboard')
+      if (isLoginForm) {
+        await login(email, password)
+        toast.success('Login realizado com sucesso!')
       } else {
-        const error = await response.text()
-        alert(error)
+        // Implementar lógica de registro aqui
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.get('name'),
+            email,
+            password,
+            accessLevel: 'USER'
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Falha no registro')
+        }
+
+        toast.success('Registro realizado com sucesso! Faça login para continuar.')
       }
     } catch (error) {
-      console.error('An error occurred:', error)
-      alert('An error occurred. Please try again.')
+      console.error('Erro de autenticação:', error)
+      toast.error('Falha na autenticação. Por favor, tente novamente.')
     } finally {
       setIsLoading(false)
     }

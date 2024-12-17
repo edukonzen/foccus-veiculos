@@ -18,12 +18,10 @@ export async function POST(request: NextRequest) {
   try {
     const { name, email, password, accessLevel } = await request.json()
     
-    // Validar os dados recebidos
     if (!name || !email || !password || !accessLevel) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Verificar se o e-mail já está em uso
     const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser) {
       return NextResponse.json({ error: 'Email already in use' }, { status: 400 })
@@ -38,8 +36,8 @@ export async function POST(request: NextRequest) {
         accessLevel: accessLevel as 'ADMIN' | 'USER' | 'READONLY'
       },
     })
-    const { password: _password, ...userWithoutPassword } = user
-    return NextResponse.json(userWithoutPassword)
+    const { password: _, ...userWithoutPassword } = user
+    return NextResponse.json(userWithoutPassword, { status: 201 })
   } catch (error) {
     console.error('Error creating user:', error)
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })

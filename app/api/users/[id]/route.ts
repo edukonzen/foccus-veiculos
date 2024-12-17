@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = parseInt(params.id)
+    const { id } = params
     const user = await prisma.user.findUnique({
       where: { id },
       select: { id: true, name: true, email: true, accessLevel: true, createdAt: true, updatedAt: true },
@@ -21,10 +21,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = parseInt(params.id)
+    const { id } = params
     const { name, email, password, accessLevel } = await request.json()
     
-    // Validar os dados recebidos
     if (!name || !email || !accessLevel) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
@@ -35,10 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
     const user = await prisma.user.update({ 
       where: { id }, 
-      data: {
-        ...updateData,
-        accessLevel: accessLevel as 'ADMIN' | 'USER' | 'READONLY'
-      }
+      data: updateData
     })
     const { password: _, ...userWithoutPassword } = user
     return NextResponse.json(userWithoutPassword)
@@ -50,7 +46,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = parseInt(params.id)
+    const { id } = params
     await prisma.user.delete({ where: { id } })
     return NextResponse.json({ message: 'User deleted successfully' })
   } catch (error) {

@@ -8,11 +8,12 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { toast } from "sonner"
 
 type AccessLevel = 'ADMIN' | 'USER' | 'READONLY'
 
 interface User {
-  id: number
+  id: string
   name: string
   email: string
   accessLevel: AccessLevel
@@ -71,14 +72,19 @@ export function UserSettings() {
         const response = await fetch(`/api/users/${editingUser.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...editingUser, password: newPassword }),
+          body: JSON.stringify({ 
+            name: editingUser.name, 
+            email: editingUser.email, 
+            accessLevel: editingUser.accessLevel,
+            ...(newPassword ? { password: newPassword } : {})
+          }),
         })
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.error || 'Failed to update user')
         }
         setEditingUser(null)
-        alert("Usuário atualizado com sucesso!")
+        toast.success("Usuário atualizado com sucesso!")
       } else {
         const response = await fetch('/api/users', {
           method: 'POST',
@@ -90,7 +96,7 @@ export function UserSettings() {
           throw new Error(errorData.error || 'Failed to create user')
         }
         setNewUser({ name: '', email: '', password: '', accessLevel: 'USER' })
-        alert("Novo usuário criado com sucesso!")
+        toast.success("Novo usuário criado com sucesso!")
       }
       setNewPassword('')
       setIsModalOpen(false)
@@ -101,7 +107,7 @@ export function UserSettings() {
     }
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
       try {
         const response = await fetch(`/api/users/${id}`, { method: 'DELETE' })

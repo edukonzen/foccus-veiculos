@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { CustomCarousel } from "@/components/CustomCarousel"
@@ -33,6 +34,7 @@ interface FinancingPartner {
   name: string
   description: string
   logo: string
+  additionalInfo: string
 }
 
 export default function HomePage() {
@@ -40,11 +42,12 @@ export default function HomePage() {
   const [cars, setCars] = useState<Car[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [financingPartners, setFinancingPartners] = useState<FinancingPartner[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPartner, setSelectedPartner] = useState<FinancingPartner | null>(null)
 
   useEffect(() => {
     const fetchCars = async () => {
-      setIsLoading(true);
-      setError(null);
       try {
         const response = await fetch('/api/cars');
         if (!response.ok) throw new Error('Failed to fetch cars');
@@ -52,13 +55,33 @@ export default function HomePage() {
         setCars(data);
       } catch (err) {
         console.error("Error fetching cars:", err);
-        setError("Failed to load cars. Please try again later.");
-      } finally {
-        setIsLoading(false);
+        setError(prev => prev ? `${prev}. Failed to load cars.` : "Failed to load cars.");
       }
     };
 
-    fetchCars();
+    const fetchFinancingPartners = async () => {
+      try {
+        const response = await fetch('/api/financing');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Fetched financing partners:", data);
+        setFinancingPartners(data);
+      } catch (error) {
+        console.error("Error fetching financing partners:", error);
+        setError(prev => prev ? `${prev}. Failed to load financing partners.` : "Failed to load financing partners.");
+      }
+    };
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      await Promise.all([fetchCars(), fetchFinancingPartners()]);
+      setIsLoading(false);
+    };
+
+    fetchData();
   }, [])
 
   const filteredCars = selectedCategory === "all"
@@ -91,39 +114,18 @@ export default function HomePage() {
     buttonText: "Saiba Mais"
   }))
 
-  const mockedFinancingPartners: FinancingPartner[] = [
-    {
-      id: "1",
-      name: "Banco Auto",
-      description: "Financiamento flexível para todos os modelos",
-      logo: "/placeholder.svg"
-    },
-    {
-      id: "2",
-      name: "Crédito Fácil",
-      description: "Aprovação rápida e taxas competitivas",
-      logo: "/placeholder.svg"
-    },
-    {
-      id: "3",
-      name: "Leasing Premium",
-      description: "Opções de leasing para carros de luxo",
-      logo: "/placeholder.svg"
-    },
-    {
-      id: "4",
-      name: "Financia Tudo",
-      description: "Soluções personalizadas de financiamento",
-      logo: "/placeholder.svg"
-    }
-  ]
+  const handlePartnerClick = (partner: FinancingPartner) => {
+    setSelectedPartner(partner);
+    setIsModalOpen(true);
+  };
 
-  const partnerCarouselItems = mockedFinancingPartners.map(partner => ({
+  const partnerCarouselItems = financingPartners.map(partner => ({
     title: partner.name,
     description: partner.description,
     imageSrc: partner.logo,
     buttonText: "Ver Opções",
-    buttonVariant: "outline" as const
+    buttonVariant: "outline" as const,
+    onClick: () => handlePartnerClick(partner)
   }))
 
   if (isLoading) {
@@ -174,15 +176,17 @@ export default function HomePage() {
           backgroundColor="bg-gray-100"
         />
 
-        <CustomCarousel
-          items={partnerCarouselItems}
-          title="Nossos Parceiros de Financiamento"
-          imageAspectRatio="16/9"
-          imageHeight={96}
-          titleClamp={2}
-          descriptionClamp={2}
-          backgroundColor="bg-white"
-        />
+        {financingPartners.length > 0 && (
+          <CustomCarousel
+            items={partnerCarouselItems}
+            title="Nossos Parceiros de Financiamento"
+            imageAspectRatio="16/9"
+            imageHeight={96}
+            titleClamp={2}
+            descriptionClamp={2}
+            backgroundColor="bg-white"
+          />
+        )}
 
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
           <div className="container mx-auto px-4 md:px-6 text-center">
@@ -204,6 +208,17 @@ export default function HomePage() {
         </section>
       </main>
       <Footer />
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedPartner?.name}</DialogTitle>
+            <DialogDescription>
+              {selectedPartner?.additionalInfo}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
