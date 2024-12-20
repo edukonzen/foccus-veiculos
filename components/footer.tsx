@@ -4,12 +4,11 @@ import { Input } from "@/components/ui/input"
 import { Facebook, Twitter, Instagram, Youtube, Settings } from 'lucide-react'
 import { storeAddress, storeNumber1, storeNumber2 } from "@/app/contact/_components/contact";
 
-
 export function Footer() {
   return (
-    <footer className="bg-gray-100">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-gray-100 border-t border-gray-200">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <Link href="/dashboard">
               <Button variant="outline" className="w-full flex items-center justify-center">
@@ -59,9 +58,9 @@ export function Footer() {
               </p>
             </address>
           </div>
-          <div>
+          <div className="md:col-span-2 lg:col-span-1">
             <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-gray-600 mb-4">
               Fique por dentro das novidades e ofertas especiais!
             </p>
             <form className="space-y-2">
@@ -79,10 +78,10 @@ export function Footer() {
         </div>
         <div className="mt-8 pt-8 border-t border-gray-200">
           <div className="flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-xs text-gray-500">
-              &copy; 2024 FoccusCars. Todos os direitos reservados.
+            <p className="text-sm text-gray-500 mb-4 sm:mb-0">
+              &copy; {new Date().getFullYear()} FoccusCars. Todos os direitos reservados.
             </p>
-            <div className="flex space-x-4 mt-4 sm:mt-0">
+            <div className="flex space-x-4">
               <Link href="#" className="text-gray-400 hover:text-primary transition-colors">
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">Facebook</span>

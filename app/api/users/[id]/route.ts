@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const updateData: any = { name, email, accessLevel }
+    const updateData: Partial<{ name: string; email: string; accessLevel: string; password: string }> = { name, email, accessLevel }
     if (password) {
       updateData.password = await bcrypt.hash(password, 10)
     }
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       where: { id }, 
       data: updateData
     })
-    const { password: _, ...userWithoutPassword } = user
+    const { password: _password, ...userWithoutPassword } = user
     return NextResponse.json(userWithoutPassword)
   } catch (error) {
     console.error('Error updating user:', error)

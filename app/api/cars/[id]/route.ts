@@ -5,7 +5,10 @@ import path from 'path'
 
 const uploadDir = path.join(process.cwd(), 'public', 'uploads')
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const id = parseInt(params.id)
     const formData = await request.formData()

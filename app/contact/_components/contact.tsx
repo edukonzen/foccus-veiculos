@@ -12,7 +12,12 @@ const storeInfo = {
   email: "contato@carstore.com"
 };
 
-export const { address: storeAddress, number1: storeNumber1, number2: storeNumber2, email: storeEmail } = storeInfo;
+//export const { address: storeAddress, number1: storeNumber1, number2: storeNumber2, email: storeEmail } = storeInfo;
+
+export const storeAddress = storeInfo.address;
+export const storeNumber1 = storeInfo.number1;
+export const storeNumber2 = storeInfo.number2;
+export const storeEmail = storeInfo.email;
 
 export default function ContatoPage() {
   return (

@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const additionalInfo = formData.get('additionalInfo') as string
     const logoFile = formData.get('logo') as File | null
 
-    const updateData: any = { name, description, additionalInfo }
+    const updateData: Partial<{ name: string; description: string; additionalInfo: string; logo: string }> = { name, description, additionalInfo }
 
     if (logoFile) {
       const bytes = await logoFile.arrayBuffer()

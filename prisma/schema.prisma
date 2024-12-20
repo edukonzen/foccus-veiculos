@@ -62,15 +62,9 @@ model Customer {
 model FinancingProposal {
   id             Int      @id @default(autoincrement())
   customerName   String
-  customerSurname String
-  dateOfBirth    DateTime
   cpf            String
-  rg             String
-  isMarried      Boolean
-  proposalDate   DateTime
+  proposalDate   DateTime @default(now())
   status         String
-  documents      String[]
-  address        String
   proposalValue  Float
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
