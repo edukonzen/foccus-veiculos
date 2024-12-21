@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, accessLevel } = await request.json()
+    const { name, email, password } = await request.json()
 
     const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser) {
@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password: hashedPassword,
-        accessLevel: accessLevel as AccessLevel,
+        accessLevel: 'USER',
+        status: true,
       },
     })
 

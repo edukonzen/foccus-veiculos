@@ -17,6 +17,7 @@ interface User {
   name: string
   email: string
   accessLevel: AccessLevel
+  status: boolean
   createdAt: string
   updatedAt: string
 }
@@ -27,7 +28,8 @@ export function UserSettings() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [newPassword, setNewPassword] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterBy, setFilterBy] = useState<'name' | 'email' | 'accessLevel'>('name')
 
   useEffect(() => {
     fetchUsers()
@@ -43,7 +45,7 @@ export function UserSettings() {
       setUsers(data)
     } catch (error) {
       console.error('Error fetching users:', error)
-      setError("Ocorreu um erro ao carregar os usuários. Por favor, tente novamente.")
+      toast.error("Ocorreu um erro ao carregar os usuários. Por favor, tente novamente.")
     }
   }
 
@@ -66,7 +68,6 @@ export function UserSettings() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
     try {
       if (editingUser) {
         const response = await fetch(`/api/users/${editingUser.id}`, {
@@ -76,6 +77,7 @@ export function UserSettings() {
             name: editingUser.name, 
             email: editingUser.email, 
             accessLevel: editingUser.accessLevel,
+            status: editingUser.status,
             ...(newPassword ? { password: newPassword } : {})
           }),
         })
@@ -103,7 +105,7 @@ export function UserSettings() {
       fetchUsers()
     } catch (error) {
       console.error('Error submitting user:', error)
-      setError(error instanceof Error ? error.message : "Ocorreu um erro. Por favor, tente novamente.")
+      toast.error(error instanceof Error ? error.message : "Ocorreu um erro. Por favor, tente novamente.")
     }
   }
 
@@ -115,10 +117,10 @@ export function UserSettings() {
           throw new Error('Failed to delete user')
         }
         fetchUsers()
-        alert("Usuário excluído com sucesso!")
+        toast.success("Usuário excluído com sucesso!")
       } catch (error) {
         console.error('Error deleting user:', error)
-        setError("Ocorreu um erro ao excluir o usuário. Por favor, tente novamente.")
+        toast.error("Ocorreu um erro ao excluir o usuário. Por favor, tente novamente.")
       }
     }
   }
@@ -129,11 +131,24 @@ export function UserSettings() {
     setIsModalOpen(true)
   }
 
+  const filteredUsers = users.filter(user => {
+    const searchLower = searchTerm.toLowerCase()
+    switch (filterBy) {
+      case 'name':
+        return user.name.toLowerCase().includes(searchLower)
+      case 'email':
+        return user.email.toLowerCase().includes(searchLower)
+      case 'accessLevel':
+        return user.accessLevel.toLowerCase().includes(searchLower)
+      default:
+        return true
+    }
+  })
+
   return (
-    <div>
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Configurações de Usuário</h2>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold">Configurações de Usuário</h2>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => {
@@ -149,7 +164,7 @@ export function UserSettings() {
               <DialogTitle>{editingUser ? 'Editar Usuário' : 'Adicionar Novo Usuário'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="name">Nome</Label>
                 <Input 
                   id="name" 
@@ -159,7 +174,7 @@ export function UserSettings() {
                   required 
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
                 <Input 
                   id="email" 
@@ -170,7 +185,7 @@ export function UserSettings() {
                   required 
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="password">
                   {editingUser ? 'Nova Senha (deixe em branco para manter a atual)' : 'Senha'}
                 </Label>
@@ -183,13 +198,13 @@ export function UserSettings() {
                   required={!editingUser}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="accessLevel">Nível de Acesso</Label>
                 <Select 
                   onValueChange={handleAccessLevelChange}
                   value={editingUser ? editingUser.accessLevel : newUser.accessLevel}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="accessLevel">
                     <SelectValue placeholder="Selecione o nível de acesso" />
                   </SelectTrigger>
                   <SelectContent>
@@ -199,31 +214,69 @@ export function UserSettings() {
                   </SelectContent>
                 </Select>
               </div>
+              {editingUser && (
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select 
+                    onValueChange={(value) => setEditingUser({...editingUser, status: value === 'true'})}
+                    value={editingUser.status.toString()}
+                  >
+                    <SelectTrigger id="status">
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Ativo</SelectItem>
+                      <SelectItem value="false">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <DialogFooter>
                 <Button type="submit">{editingUser ? 'Atualizar Usuário' : 'Adicionar Usuário'}</Button>
-                <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
+
+      <div className="flex space-x-2">
+        <Input
+          placeholder="Buscar usuários..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
+        <Select value={filterBy} onValueChange={(value: 'name' | 'email' | 'accessLevel') => setFilterBy(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filtrar por" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name">Nome</SelectItem>
+            <SelectItem value="email">E-mail</SelectItem>
+            <SelectItem value="accessLevel">Nível de Acesso</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead>E-mail</TableHead>
             <TableHead>Nível de Acesso</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Data de Criação</TableHead>
             <TableHead>Última Atualização</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map(user => (
+          {filteredUsers.map(user => (
             <TableRow key={user.id}>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell className="capitalize">{user.accessLevel.toLowerCase()}</TableCell>
+              <TableCell>{user.accessLevel}</TableCell>
+              <TableCell>{user.status ? 'Ativo' : 'Inativo'}</TableCell>
               <TableCell>{new Date(user.createdAt).toLocaleString()}</TableCell>
               <TableCell>{new Date(user.updatedAt).toLocaleString()}</TableCell>
               <TableCell>

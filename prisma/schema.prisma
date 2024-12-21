@@ -36,14 +36,25 @@ model User {
   email        String   @unique
   password     String
   accessLevel  AccessLevel
+  status       Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  tokens       Token[]
 }
 
 enum AccessLevel {
   ADMIN
   USER
   READONLY
+}
+
+model Token {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Customer {

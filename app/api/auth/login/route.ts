@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,8 +17,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
     }
 
-    const { password: _password, ...userWithoutPassword } = user
-    return NextResponse.json(userWithoutPassword)
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1d' }
+    )
+
+    const { password: _, ...userWithoutPassword } = user
+
+    const response = NextResponse.json(userWithoutPassword)
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 86400,
+      path: '/',
+    })
+
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
