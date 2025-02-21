@@ -5,9 +5,9 @@ import path from 'path'
 
 const uploadDir = path.join(process.cwd(), 'public', 'uploads')
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = params
+    const id = request.nextUrl.pathname.split('/')[3] // Extrai o id da URL
     const partner = await prisma.financingPartner.findUnique({ where: { id } })
     if (!partner) {
       return NextResponse.json({ error: 'Financing partner not found' }, { status: 404 })
@@ -19,9 +19,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest) {
   try {
-    const { id } = params
+    const id = request.nextUrl.pathname.split('/')[3] // Extrai o id da URL
     const formData = await request.formData()
     const name = formData.get('name') as string
     const description = formData.get('description') as string
@@ -54,9 +54,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest) {
   try {
-    const { id } = params
+    const id = request.nextUrl.pathname.split('/')[3] // Extrai o id da URL
     await prisma.financingPartner.delete({ where: { id } })
     return NextResponse.json({ message: 'Financing partner deleted successfully' })
   } catch (error) {
@@ -64,4 +64,3 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Failed to delete financing partner' }, { status: 500 })
   }
 }
-

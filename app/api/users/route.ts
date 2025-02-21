@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { omit } from 'lodash'  
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       { expiresIn: '1d' }
     )
 
-    const { password: _, ...userWithoutPassword } = user
+    const userWithoutPassword = omit(user, 'password')
 
     const response = NextResponse.json(userWithoutPassword)
     response.cookies.set('token', token, {
@@ -40,4 +41,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

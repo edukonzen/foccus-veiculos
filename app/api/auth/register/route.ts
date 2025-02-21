@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcrypt'
+import { omit } from 'lodash' // ✅ Importando omit
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,11 +24,12 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const { password: _, ...userWithoutPassword } = user
+    // ✅ Removendo 'password' antes de retornar o objeto
+    const userWithoutPassword = omit(user, 'password')
+
     return NextResponse.json(userWithoutPassword, { status: 201 })
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

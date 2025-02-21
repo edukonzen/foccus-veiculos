@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { writeFile } from 'fs/promises'
@@ -5,12 +6,9 @@ import path from 'path'
 
 const uploadDir = path.join(process.cwd(), 'public', 'uploads')
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
-    const id = parseInt(params.id)
+    const id = request.nextUrl.pathname.split('/')[3] // Extrai o ID da URL
     const formData = await request.formData()
 
     const carData = {
@@ -31,7 +29,7 @@ export async function PUT(
     const newPhotoUrls = await Promise.all(newPhotos.map(savePhoto))
 
     const car = await prisma.car.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: {
         ...carData,
         photos: {
@@ -44,7 +42,7 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json(car)
+    return NextResponse.json({ message: 'Car updated successfully' })
   } catch (error) {
     console.error('Error updating car:', error)
     return NextResponse.json({ error: 'Failed to update car' }, { status: 500 })
@@ -62,11 +60,11 @@ async function savePhoto(file: File): Promise<string> {
   return `/uploads/${filename}`
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest) {
   try {
-    const id = parseInt(params.id)
+    const id = request.nextUrl.pathname.split('/')[3] // Extrai o ID da URL
     await prisma.car.delete({
-      where: { id },
+      where: { id: parseInt(id) },
       include: {
         photos: true
       }
@@ -77,4 +75,3 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Failed to delete car' }, { status: 500 })
   }
 }
-
