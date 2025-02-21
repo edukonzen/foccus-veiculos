@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Car {
+  id           Int      @id @default(autoincrement())
+  model        String
+  manufacturer String
+  year         Int
+  price        Float
+  color        String
+  licensePlate String   @unique
+  doors        Int
+  transmission String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  photos       Photo[]
+  category     String
+}
+
+model Photo {
+  id     Int    @id @default(autoincrement())
+  url    String
+  carId  Int
+  car    Car    @relation(fields: [carId], references: [id])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  accessLevel  AccessLevel
+  status       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tokens       Token[]
+}
+
+enum AccessLevel {
+  ADMIN
+  USER
+  READONLY
+}
+
+model Token {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  phone       String
+  email       String   @unique
+  address     String
+  cpf         String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FinancingProposal {
+  id             Int      @id @default(autoincrement())
+  customerName   String
+  cpf            String
+  proposalDate   DateTime @default(now())
+  status         String
+  proposalValue  Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model FinancingPartner {
+  id              String   @id @default(uuid())
+  name            String
+  logo            String
+  description     String
+  additionalInfo  String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

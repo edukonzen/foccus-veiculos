@@ -10,7 +10,6 @@ import {
 import Image from 'next/image'
 import Autoplay from "embla-carousel-autoplay"
 import type { AutoplayOptionsType } from "embla-carousel-autoplay"
-//import type { Options as AutoplayOptions } from "embla-carousel-autoplay"
 
 interface CarouselItem {
   title: string
@@ -18,6 +17,7 @@ interface CarouselItem {
   imageSrc: string
   buttonText: string
   buttonVariant?: "default" | "outline"
+  onClick?: () => void
 }
 
 interface CustomCarouselProps {
@@ -31,7 +31,7 @@ interface CustomCarouselProps {
 }
 
 const autoplayOptions: AutoplayOptionsType = {
-  delay: 5000,
+  delay: 6000,
   rootNode: (emblaRoot: HTMLElement) => emblaRoot.parentElement,
 };
 
@@ -84,7 +84,13 @@ export function CustomCarousel({
                       <p className={`text-sm text-gray-600 line-clamp-${descriptionClamp}`}>{item.description}</p>
                     </CardContent>
                     <CardFooter className="mt-auto">
-                      <Button variant={item.buttonVariant || "default"} className="w-full">{item.buttonText}</Button>
+                      <Button 
+                        variant={item.buttonVariant || "default"} 
+                        className="w-full"
+                        onClick={item.onClick}
+                      >
+                        {item.buttonText}
+                      </Button>
                     </CardFooter>
                   </Card>
                 </CarouselItem>

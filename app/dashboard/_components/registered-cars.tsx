@@ -1,12 +1,21 @@
-import { useState } from 'react'
-import { Edit, Trash2, Plus } from 'lucide-react'
+'use client'
+
+import { useState, useEffect, useMemo } from 'react'
+import { Edit, Trash2, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { StandardFormModal } from "@/components/StandardFormModal"
+import { toast } from "sonner"
 import Image from 'next/image'
+
+interface Photo {
+  id?: number
+  url: string
+  file?: File
+}
 
 interface Car {
   id: number
@@ -14,242 +23,360 @@ interface Car {
   manufacturer: string
   year: number
   price: number
-  imageUrl: string
   color: string
   licensePlate: string
   doors: number
   transmission: string
+  category: string
+  photos: Photo[]
 }
 
-export function RegisteredCars() {
-  const [cars, setCars] = useState<Car[]>([
-    { id: 1, model: "Model S", manufacturer: "Tesla", year: 2022, price: 89990, imageUrl: "/placeholder.svg?height=200&width=300", color: "Red", licensePlate: "ABC123", doors: 4, transmission: "automatic" },
-    { id: 2, model: "F-150", manufacturer: "Ford", year: 2023, price: 59990, imageUrl: "/placeholder.svg?height=200&width=300", color: "Blue", licensePlate: "XYZ789", doors: 4, transmission: "automatic" },
-    { id: 3, model: "Civic", manufacturer: "Honda", year: 2022, price: 22990, imageUrl: "/placeholder.svg?height=200&width=300", color: "Silver", licensePlate: "DEF456", doors: 4, transmission: "manual" },
-    { id: 4, model: "3 Series", manufacturer: "BMW", year: 2023, price: 41990, imageUrl: "/placeholder.svg?height=200&width=300", color: "Black", licensePlate: "GHI789", doors: 4, transmission: "automatic" },
-  ])
+const carCategories = [
+  "Hatch", "Sedan", "SUV", "Picape", "Minivan", "Conversível", "Cupê", "Esportivo",
+  "Wagon (Perua)", "Utilitário", "Off-Road", "Elétrico", "Híbrido", "Compacto", "Luxo"
+]
 
+export function RegisteredCars() {
+  const [cars, setCars] = useState<Car[]>([])
   const [selectedCar, setSelectedCar] = useState<Car | null>(null)
+  const [isAddingNewCar, setIsAddingNewCar] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [formData, setFormData] = useState<Omit<Car, 'id'>>({
+    model: '',
+    manufacturer: '',
+    year: new Date().getFullYear(),
+    price: 0,
+    color: '',
+    licensePlate: '',
+    doors: 4,
+    transmission: 'automático',
+    category: '',
+    photos: []
+  })
+  const [sortBy, setSortBy] = useState<'manufacturer' | 'year' | 'category'>('manufacturer')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  useEffect(() => {
+    fetchCars()
+  }, [])
+
+  const fetchCars = async () => {
+    try {
+      const response = await fetch('/api/cars')
+      if (!response.ok) {
+        throw new Error('Failed to fetch cars')
+      }
+      const data = await response.json()
+      setCars(data)
+    } catch (error) {
+      console.error('Error fetching cars:', error)
+      toast.error('Erro ao carregar os carros')
+      setCars([])
+    }
+  }
+
+  const sortedCars = useMemo(() => {
+    return [...cars].sort((a, b) => {
+      if (sortBy === 'manufacturer') {
+        return sortOrder === 'asc'
+          ? a.manufacturer.localeCompare(b.manufacturer)
+          : b.manufacturer.localeCompare(a.manufacturer)
+      } else if (sortBy === 'year') {
+        return sortOrder === 'asc' ? a.year - b.year : b.year - a.year
+      } else {
+        return sortOrder === 'asc'
+          ? a.category.localeCompare(b.category)
+          : b.category.localeCompare(a.category)
+      }
+    })
+  }, [cars, sortBy, sortOrder])
 
   const handleEdit = (car: Car) => {
     setSelectedCar(car)
+    setFormData({
+      ...car,
+      photos: car.photos
+    })
+    setIsAddingNewCar(false)
     setIsModalOpen(true)
   }
 
-  const handleDelete = (id: number) => {
-    setCars(cars.filter(car => car.id !== id))
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Tem certeza que deseja excluir este carro?')) {
+      try {
+        const response = await fetch(`/api/cars/${id}`, { method: 'DELETE' })
+        if (!response.ok) {
+          throw new Error('Failed to delete car')
+        }
+        toast.success('Carro excluído com sucesso')
+        fetchCars()
+      } catch (error) {
+        console.error('Error deleting car:', error)
+        toast.error('Erro ao excluir o carro')
+      }
+    }
   }
 
   const handleAddNewCar = () => {
     setSelectedCar(null)
+    setFormData({
+      model: '',
+      manufacturer: '',
+      year: new Date().getFullYear(),
+      price: 0,
+      color: '',
+      licensePlate: '',
+      doors: 4,
+      transmission: 'automático',
+      category: '',
+      photos: []
+    })
+    setIsAddingNewCar(true)
     setIsModalOpen(true)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (selectedCar) {
-      if (selectedCar.id) {
-        setCars(cars.map(car => car.id === selectedCar.id ? selectedCar : car))
-      } else {
-        const newCar = {
-          ...selectedCar,
-          id: Math.max(...cars.map(c => c.id), 0) + 1
-        }
-        setCars([...cars, newCar])
-      }
-    }
-    setIsModalOpen(false)
-  }
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setSelectedCar(prev => ({ ...prev!, [name]: name === 'year' || name === 'price' || name === 'doors' ? Number(value) : value }))
+    const { name, value, type } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'number' ? Number(value) : value
+    }))
   }
 
   const handleSelectChange = (name: string, value: string) => {
-    setSelectedCar(prev => ({ ...prev!, [name]: value }))
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const renderFormFields = () => (
-    <>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="model" className="text-right">
-          Model
-        </Label>
-        <Input
-          id="model"
-          name="model"
-          value={selectedCar?.model || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="manufacturer" className="text-right">
-          Manufacturer
-        </Label>
-        <Input
-          id="manufacturer"
-          name="manufacturer"
-          value={selectedCar?.manufacturer || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="year" className="text-right">
-          Year
-        </Label>
-        <Input
-          id="year"
-          name="year"
-          type="number"
-          value={selectedCar?.year || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="price" className="text-right">
-          Price
-        </Label>
-        <Input
-          id="price"
-          name="price"
-          type="number"
-          value={selectedCar?.price || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="color" className="text-right">
-          Color
-        </Label>
-        <Input
-          id="color"
-          name="color"
-          value={selectedCar?.color || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="licensePlate" className="text-right">
-          License Plate
-        </Label>
-        <Input
-          id="licensePlate"
-          name="licensePlate"
-          value={selectedCar?.licensePlate || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="doors" className="text-right">
-          Number of Doors
-        </Label>
-        <Input
-          id="doors"
-          name="doors"
-          type="number"
-          value={selectedCar?.doors || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="transmission" className="text-right">
-          Transmission Type
-        </Label>
-        <Select
-          name="transmission"
-          value={selectedCar?.transmission || ''}
-          onValueChange={(value) => handleSelectChange('transmission', value)}
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select transmission type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="manual">Manual</SelectItem>
-            <SelectItem value="automatic">Automatic</SelectItem>
-            <SelectItem value="cvt">CVT</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="imageUrl" className="text-right">
-          Image URL
-        </Label>
-        <Input
-          id="imageUrl"
-          name="imageUrl"
-          value={selectedCar?.imageUrl || ''}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-    </>
-  )
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newPhotos: Photo[] = Array.from(e.target.files).map(file => ({
+        url: URL.createObjectURL(file),
+        file: file
+      }))
+      setFormData(prev => ({
+        ...prev,
+        photos: [...prev.photos, ...newPhotos]
+      }))
+    }
+  }
+
+  const handleRemovePhoto = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const formDataToSend = new FormData()
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key !== 'photos') {
+          formDataToSend.append(key, String(value))
+        }
+      })
+
+      formData.photos.forEach((photo) => {
+        if (photo.file instanceof File) {
+          formDataToSend.append(`photos`, photo.file, photo.file.name)
+        } else if (photo.url) {
+          formDataToSend.append(`existingPhotos`, photo.url)
+        }
+      })
+
+      const method = isAddingNewCar ? 'POST' : 'PUT'
+      const url = isAddingNewCar ? '/api/cars' : `/api/cars/${selectedCar?.id}`
+
+      const response = await fetch(url, {
+        method,
+        body: formDataToSend,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to submit car data')
+      }
+
+      toast.success(isAddingNewCar ? 'Carro adicionado com sucesso' : 'Carro atualizado com sucesso')
+      setIsModalOpen(false)
+      fetchCars()
+    } catch (error) {
+      console.error('Error submitting car data:', error)
+      toast.error(`Erro ao salvar os dados do carro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    }
+  }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Registered Cars</h2>
-        <Button onClick={handleAddNewCar}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add New Car
-        </Button>
+        <h2 className="text-3xl font-bold text-gray-800">Carros Cadastrados</h2>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={handleAddNewCar}>
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Novo Carro
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{isAddingNewCar ? 'Adicionar Novo Carro' : 'Editar Carro'}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="model">Modelo</Label>
+                  <Input id="model" name="model" value={formData.model} onChange={handleInputChange} required />
+                </div>
+                <div>
+                  <Label htmlFor="manufacturer">Fabricante</Label>
+                  <Input id="manufacturer" name="manufacturer" value={formData.manufacturer} onChange={handleInputChange} required />
+                </div>
+                <div>
+                  <Label htmlFor="year">Ano</Label>
+                  <Input id="year" name="year" type="number" value={formData.year} onChange={handleInputChange} required />
+                </div>
+                <div>
+                  <Label htmlFor="price">Preço</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="color">Cor</Label>
+                  <Input id="color" name="color" value={formData.color} onChange={handleInputChange} required />
+                </div>
+                <div>
+                  <Label htmlFor="licensePlate">Placa</Label>
+                  <Input id="licensePlate" name="licensePlate" value={formData.licensePlate} onChange={handleInputChange} required />
+                </div>
+                <div>
+                  <Label htmlFor="doors">Número de Portas</Label>
+                  <Input id="doors" name="doors" type="number" value={formData.doors} onChange={handleInputChange} required />
+                </div>
+                <div>
+                  <Label htmlFor="transmission">Tipo de Transmissão</Label>
+                  <Select name="transmission" value={formData.transmission} onValueChange={(value) => handleSelectChange('transmission', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo de transmissão" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="manual">Manual</SelectItem>
+                      <SelectItem value="automático">Automático</SelectItem>
+                      <SelectItem value="cvt">CVT</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2">
+                  <Label htmlFor="category">Categoria</Label>
+                  <Select name="category" value={formData.category} onValueChange={(value) => handleSelectChange('category', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {carCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="photos">Fotos do Carro</Label>
+                <Input id="photos" name="photos" type="file" onChange={handleFileChange} accept="image/*" multiple />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.photos.map((photo, index) => (
+                  <div key={index} className="relative">
+                    <Image
+                      src={photo.url}
+                      alt={`Preview ${index}`}
+                      width={100}
+                      height={100}
+                      className="object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePhoto(index)}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Button type="submit">{isAddingNewCar ? 'Adicionar Carro' : 'Atualizar Carro'}</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cars.map(car => (
+      <div className="flex justify-end space-x-2 mb-4">
+        <Select value={sortBy} onValueChange={(value: 'manufacturer' | 'year' | 'category') => setSortBy(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Ordenar por" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="manufacturer">Fabricante</SelectItem>
+            <SelectItem value="year">Ano</SelectItem>
+            <SelectItem value="category">Categoria</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Ordem" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Crescente</SelectItem>
+            <SelectItem value="desc">Decrescente</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedCars.map(car => (
           <Card key={car.id} className="overflow-hidden">
-            <Image
-              src={car.imageUrl}
-              alt={`${car.manufacturer} ${car.model}`}
-              width={300}
-              height={200}
-              className="w-full h-48 object-cover"
-            />
+            {car.photos.length > 0 ? (
+              <Image
+                src={car.photos[0].url}
+                alt={`${car.manufacturer} ${car.model}`}
+                width={300}
+                height={200}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500">Sem imagem</span>
+              </div>
+            )}
             <CardContent className="p-4">
               <h3 className="text-lg font-semibold">{car.manufacturer} {car.model}</h3>
-              <p className="text-sm text-gray-600">Year: {car.year}</p>
-              <p className="text-sm text-gray-600">Color: {car.color}</p>
-              <p className="text-sm text-gray-600">License Plate: {car.licensePlate}</p>
-              <p className="text-sm font-bold mt-2">${car.price.toLocaleString()}</p>
+              <p className="text-sm text-gray-600">Ano: {car.year}</p>
+              <p className="text-sm text-gray-600">Cor: {car.color}</p>
+              <p className="text-sm text-gray-600">Placa: {car.licensePlate}</p>
+              <p className="text-sm text-gray-600">Categoria: {car.category}</p>
+              <p className="text-sm font-bold mt-2">R$ {car.price.toLocaleString()}</p>
             </CardContent>
             <CardFooter className="bg-gray-50 p-4 flex justify-end space-x-2">
               <Button variant="outline" size="sm" onClick={() => handleEdit(car)}>
                 <Edit className="w-4 h-4 mr-2" />
-                Edit
+                Editar
               </Button>
               <Button variant="destructive" size="sm" onClick={() => handleDelete(car.id)}>
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete
+                Excluir
               </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
-
-      <StandardFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={selectedCar?.id ? 'Edit Car' : 'Add New Car'}
-        onSubmit={handleSubmit}
-      >
-        {renderFormFields()}
-      </StandardFormModal>
     </div>
   )
 }

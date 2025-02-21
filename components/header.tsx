@@ -2,10 +2,11 @@
 
 import { useState, useCallback } from "react"
 import Link from "next/link"
+import { useAuth } from '@/contexts/AuthContext'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Search, User, Menu } from 'lucide-react'
+import { Search, User, Menu, LogOut } from 'lucide-react'
 import Image from 'next/image'
 
 const NAV_ITEMS = [
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
 ]
 
 export function Header() {
+  const { user, logout } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
@@ -102,6 +104,38 @@ export function Header() {
     </div>
   ), [isOpen, toggleMenu, toggleSearch])
 
+  const UserMenu = useCallback(() => (
+    <div className="relative group">
+      {user ? (
+        <div className="flex items-center space-x-2">
+          <span className="text-sm font-medium text-white transition-opacity duration-300 group-hover:opacity-80">
+            {user.name}
+          </span>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={logout}
+            aria-label="Logout" 
+            className="relative text-white transition-all duration-300 hover:bg-white/20"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
+      ) : (
+        <Link href="/auth">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            aria-label="Login" 
+            className="relative text-white transition-all duration-300 hover:bg-white/20"
+          >
+            <User className="h-5 w-5" />
+          </Button>
+        </Link>
+      )}
+    </div>
+  ), [user, logout])
+
   return (
     <header className="w-full border-b border-gray-800 bg-black text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -122,19 +156,7 @@ export function Header() {
             <div className="w-64">
               <SearchForm />
             </div>
-            <div className="relative group rounded-md overflow-hidden">
-              <Link href="/auth">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  aria-label="Perfil do usuário" 
-                  className="relative z-10 text-white transition-all duration-300"
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-              </Link>
-              <div className="absolute inset-0 bg-white/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
+            <UserMenu />
           </div>
           <MobileNav />
         </div>
